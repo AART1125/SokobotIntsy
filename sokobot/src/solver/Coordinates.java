@@ -1,26 +1,26 @@
 package solver;
 
 public class Coordinates {
-    private int posX, posY;
+    private int x, y;
 
         public Coordinates(int X, int Y){
-            this.posX = X;
-            this.posY = Y;
+            this.x = X;
+            this.y = Y;
         }
 
-        public int getPosX() {
-            return posX;
+        public int getX() {
+            return x;
         }
 
-        public int getPosY() {
-            return posY;
+        public int getY() {
+            return y;
         }
 
-        public void setPosX(int posX) {
-            this.posX = posX;
+        public void setX(int x) {
+            this.x = x;
         }
 
-        public void setPosY(int posY) {
-            this.posY = posY;
+        public void setY(int y) {
+            this.y = y;
         }
 }

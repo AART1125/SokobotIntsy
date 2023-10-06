@@ -15,6 +15,7 @@ public class Node implements Comparable<Node>{
     private char[][] map, items;//Representation of map and the movable items within it
     private int actualCost, heuristicCost;//Costs of this state
     private Node parentNode;//Node connected to the state
+    private String path;// A string representation of the path taken to get to the current state
 
     /**
      * Constructor for the root node
@@ -46,7 +47,7 @@ public class Node implements Comparable<Node>{
         this.target = parentNode.getTarget();
 
         this.map = parentNode.getMap();
-        this.items = itemsData;
+        this.items = parentNode.getItems();
         this.actualCost = parentNode.getActualCost() + 1;
         this.heuristicCost = calculateHeuristicCost();
     }
@@ -126,7 +127,7 @@ public class Node implements Comparable<Node>{
         for (Coordinates boxes : boxes) {
             min = 100;
             for (Coordinates target : target) {
-                dist = Math.abs(boxes.getPosX() - target.getPosX()) + Math.abs(boxes.getPosY() - target.getPosY());
+                dist = Math.abs(boxes.getX() - target.getX()) + Math.abs(boxes.getY() - target.getY());
                 min = Math.min(min, dist);
             }
             cost += min;
@@ -136,7 +137,8 @@ public class Node implements Comparable<Node>{
     }
 
     //Creates a new state based on the direction it decided to go to
-    private char[][] newState(Node state){
+    private char[][] newState(Node state, char dir){
+        
         return null;
     }
 
@@ -156,30 +158,30 @@ public class Node implements Comparable<Node>{
     public boolean isMoveValid(char move) {
         switch (move) {
             case 'u':
-                if (map[player.getPosX() - 1][player.getPosY()] == '#' ||
-                    map[player.getPosX() - 2].length <= player.getPosY()) {
+                if (map[player.getX() - 1][player.getY()] == '#' ||
+                    map[player.getX() - 2].length <= player.getY()) {
                     return false;
                 } else {
                     return true;
                 }
             case 'd':
-                if (map[player.getPosX() + 1][player.getPosY()] == '#' ||
-                    map[player.getPosX() + 2].length <= player.getPosY()) {
+                if (map[player.getX() + 1][player.getY()] == '#' ||
+                    map[player.getX() + 2].length <= player.getY()) {
                     return false;
                 } else {
                     return true;
                 }
             case 'l':
-                if (map[player.getPosX()][player.getPosY() - 1] == '#' ||
-                    player.getPosY() <= 1) {
+                if (map[player.getX()][player.getY() - 1] == '#' ||
+                    player.getY() <= 1) {
                     return false;
                 } else {
                     return true;
                 }
                 
             case 'r':
-                if (map[player.getPosX()][player.getPosY() + 1] == '#' ||
-                    map[player.getPosX() + 2].length <= player.getPosY() + 2) {
+                if (map[player.getX()][player.getY() + 1] == '#' ||
+                    map[player.getX() + 2].length <= player.getY() + 2) {
                     return false;
                 } else {
                     return true;

@@ -3,18 +3,19 @@ package solver;
 import java.util.PriorityQueue;
 
 public class SokoBot {
+  
 
   public String solveSokobanPuzzle(int width, int height, char[][] mapData, char[][] itemsData) {
-    /*
-     * YOU NEED TO REWRITE THE IMPLEMENTATION OF THIS METHOD TO MAKE THE BOT SMARTER
-     */
+    
+     char[] moves = {'u','d','l','r'};
      String result = "uuddlrlr"; //resulting moves the robot needs to do to solve puzzle
      Node root = new Node(height, width, mapData, itemsData);
-     PriorityQueue<Node> frontier = new PriorityQueue<>();
-     PriorityQueue<Node> explored = new PriorityQueue<>();
+     PriorityQueue<Node> frontier = new PriorityQueue<Node>(new CostCompare());
+     PriorityQueue<Node> explored = new PriorityQueue<Node>();
      
-     frontier.offer(root);
+     frontier.add(root);
      if (frontier.contains(root)) {
+      
       System.out.println("Root exists");
      } else {
       System.out.println("Error!!! Root not found in queue");
