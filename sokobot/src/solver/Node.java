@@ -2,8 +2,11 @@ package solver;
 
 import java.lang.Math;
 
-/*
- * Represents the current/possible states of the game
+/**
+ * Represents the current/possible states of the game. Goal of the game is to put all boxes in its 
+ * rightful position, therefore, a state or node should contain the information of the map i.e player position,
+ * box position, target position, and the cost of the state. This class is using the comparable interface
+ * in order to be used for the priority queue class in searching for the optimal path for the bot.
  */
 public class Node implements Comparable<Node>{
 
@@ -13,7 +16,13 @@ public class Node implements Comparable<Node>{
     private int actualCost, heuristicCost;//Costs of this state
     private Node parentNode;//Node connected to the state
 
-    //Constructer for root node
+    /**
+     * Constructor for the root node
+     * @param height height of the map
+     * @param width width of the map
+     * @param mapData the representation of the immovable objects in the map
+     * @param itemsData the representation of movable objects in the map
+     */
     public Node(int height, int width, char[][] mapData, char[][] itemsData) {
         this.player = playerPosition(height, width, itemsData);
         this.boxes = boxPosition(height, width, itemsData);
@@ -25,16 +34,21 @@ public class Node implements Comparable<Node>{
         this.parentNode = null;
     }
 
-    //Constructer for child node
-    public Node(int height, int width, char[][] mapData, char[][] itemsData, Node parentNode) {
-        this.player = playerPosition(height, width, itemsData);
-        this.boxes = boxPosition(height, width, itemsData);
-        this.target = targetPosition(height, width, mapData);
-        this.map = mapData;
-        this.items = itemsData;
-        this.actualCost = parentNode.getActualCost();
-        this.heuristicCost = calculateHeuristicCost();
+    /**
+     * Constructor for the child node
+     * @param parentNode the parent node of the state
+     */
+    public Node(Node parentNode) {
         this.parentNode = parentNode;
+
+        this.player = parentNode.getPlayer();
+        this.boxes = parentNode.getBoxes();
+        this.target = parentNode.getTarget();
+
+        this.map = parentNode.getMap();
+        this.items = itemsData;
+        this.actualCost = parentNode.getActualCost() + 1;
+        this.heuristicCost = calculateHeuristicCost();
     }
 
     //reads the position of target items
@@ -121,6 +135,11 @@ public class Node implements Comparable<Node>{
         return cost;
     }
 
+    //Creates a new state based on the direction it decided to go to
+    private char[][] newState(Node state){
+        return null;
+    }
+
     //Overided method of Comparable interface
     @Override
     public int compareTo(Node node) {
@@ -134,8 +153,40 @@ public class Node implements Comparable<Node>{
     }
 
     //Checks if the possible movement is a valid one or not
-    public boolean isValidMove(char move) {
-        return false;
+    public boolean isMoveValid(char move) {
+        switch (move) {
+            case 'u':
+                if (map[player.getPosX() - 1][player.getPosY()] == '#' ||
+                    map[player.getPosX() - 2].length <= player.getPosY()) {
+                    return false;
+                } else {
+                    return true;
+                }
+            case 'd':
+                if (map[player.getPosX() + 1][player.getPosY()] == '#' ||
+                    map[player.getPosX() + 2].length <= player.getPosY()) {
+                    return false;
+                } else {
+                    return true;
+                }
+            case 'l':
+                if (map[player.getPosX()][player.getPosY() - 1] == '#' ||
+                    player.getPosY() <= 1) {
+                    return false;
+                } else {
+                    return true;
+                }
+                
+            case 'r':
+                if (map[player.getPosX()][player.getPosY() + 1] == '#' ||
+                    map[player.getPosX() + 2].length <= player.getPosY() + 2) {
+                    return false;
+                } else {
+                    return true;
+                }
+            default:
+                return false;
+        }
     }
 
     public Node updateNewState() {
