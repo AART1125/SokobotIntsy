@@ -338,7 +338,7 @@ public class Node implements Comparable<Node>{
         }
     }
 
-    public boolean equals(Object obj){
+    public boolean equal(Object obj){
         if (obj == null || !(obj instanceof Node)) {
             return false;
         }
