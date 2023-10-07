@@ -28,6 +28,7 @@ public class Node implements Comparable<Node>{
     public Node(int height, int width, char[][] mapData, char[][] itemsData) {
         this.player = playerPosition(height, width, itemsData);
         this.boxes = boxPosition(height, width, itemsData);
+        this.goals = 0;
         this.target = targetPosition(height, width, mapData);
         this.map = mapData;
         this.items = itemsData;
@@ -41,24 +42,23 @@ public class Node implements Comparable<Node>{
      * Constructor for the child node based on parent nodes desicion
      * @param parentNode the parent node of the state
      */
-    public Node(Node parentNode, char move) {
+    public Node(int height, int width, Node parentNode, char move) {
         
         this.parentNode = parentNode;
         this.actualCost = parentNode.getActualCost() + 1;
         this.path = parentNode.getPath() + move;
         this.map = parentNode.getMap();
  
-        char[][] newMap= newItemState(parentNode, move);
-        this.items = new char[newMap.length][];
-        for (int i = 0; i < newMap.length; i++) {
-            this.items[i] = new char[newMap[i].length];
-            for (int j = 0; j < newMap[0].length; j++) {
+        char[][] newMap= newItemState(height, width, parentNode, move);
+        this.items = new char[newMap.length][newMap[0].length];
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
                 this.items[i][j] = newMap[i][j];
             }
         }
-
-        this.player = playerPosition(this.map.length, this.map[0].length, this.items);
-        this.boxes = boxPosition(this.map.length, this.map[0].length, this.items);
+        this.goals = 0;
+        this.player = playerPosition(height, width, this.items);
+        this.boxes = boxPosition(height, width, this.items);
         this.target = parentNode.getTarget();
 
         this.heuristicCost = calculateHeuristicCost();
@@ -167,12 +167,11 @@ public class Node implements Comparable<Node>{
     }
 
     //Creates a new state based on the direction it decided to go to
-    private char[][] newItemState(Node state, char move){
-        char[][] newState = new char[state.getItems().length][];//initialize the original state to change accordingly
+    private char[][] newItemState(int height, int width, Node state, char move){
+        char[][] newState = new char[height][width];//initialize the original state to change accordingly
 
-        for (int i = 0; i < newState.length; i++) {
-            newState[i] = new char[state.getItems()[i].length];
-            for (int j = 0; j < newState.length; j++) {
+        for (int i = 0; i < height; i++) {
+            for (int j = 0; j < width; j++) {
                 newState[i][j] = state.getItems()[i][j];
             }
         }
@@ -180,7 +179,6 @@ public class Node implements Comparable<Node>{
         if (isMoveValid(state, move)) {
             switch (move) {
             case 'u':
-                System.out.println("can move up");
                 if (newState[state.getPlayer().getX() - 1][state.getPlayer().getY()] == ' ' ||
                 map[state.getPlayer().getX() - 1][state.getPlayer().getY()] == '.') {
 
@@ -198,13 +196,13 @@ public class Node implements Comparable<Node>{
                     }
                 }
             
-                newState[state.getPlayer().getX()][state.getPlayer().getY()] = ' ';
+                if(newState[state.getPlayer().getX()][state.getPlayer().getY()] == '@')
+                    newState[state.getPlayer().getX()][state.getPlayer().getY()] = ' ';
 
                 return newState;
             
             
             case 'd':
-                System.out.println("can move down");
                 if (newState[state.getPlayer().getX() + 1][state.getPlayer().getY()] == ' ' ||
                     map[state.getPlayer().getX() + 1][state.getPlayer().getY()] == '.') {
 
@@ -222,13 +220,13 @@ public class Node implements Comparable<Node>{
                     }
                 }
                 
-                newState[state.getPlayer().getX()][state.getPlayer().getY()] = ' ';
+                if(newState[state.getPlayer().getX()][state.getPlayer().getY()] == '@')
+                    newState[state.getPlayer().getX()][state.getPlayer().getY()] = ' ';
 
                 return newState;
             
             
             case 'l':
-                System.out.println("can move left");
                 if (newState[state.getPlayer().getX()][state.getPlayer().getY() - 1] == ' ' ||
                     map[state.getPlayer().getX()][state.getPlayer().getY() - 1] == '.') {
 
@@ -246,13 +244,13 @@ public class Node implements Comparable<Node>{
                     }
                 }
                 
-                newState[state.getPlayer().getX()][state.getPlayer().getY()] = ' ';
+                if(newState[state.getPlayer().getX()][state.getPlayer().getY()] == '@')
+                    newState[state.getPlayer().getX()][state.getPlayer().getY()] = ' ';
 
                 return newState;
             
             
             case 'r':
-                System.out.println("can move right");
                 if (newState[state.getPlayer().getX()][state.getPlayer().getY() + 1] == ' ' ||
                     map[state.getPlayer().getX()][state.getPlayer().getY() + 1] == '.') {
 
@@ -270,14 +268,13 @@ public class Node implements Comparable<Node>{
                     }
                 }
                 
-                newState[state.getPlayer().getX()][state.getPlayer().getY()] = ' ';
+                if(newState[state.getPlayer().getX()][state.getPlayer().getY()] == '@')
+                    newState[state.getPlayer().getX()][state.getPlayer().getY()] = ' ';
                 
                 return newState;
             
             }
-        } else {
-            System.out.println("invalid move");
-        }
+        } 
         
         return newState;
     }
@@ -341,6 +338,18 @@ public class Node implements Comparable<Node>{
         }
     }
 
+    public boolean equals(Object obj){
+        if (obj == null || !(obj instanceof Node)) {
+            return false;
+        }
+
+        if (((Node)obj).stringRep().equals(this.stringRep())) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     // Calculates the f function value of the node
     public int fValue(){
         return actualCost + heuristicCost;
@@ -356,6 +365,10 @@ public class Node implements Comparable<Node>{
 
     public int getHeuristicCost() {
         return heuristicCost;
+    }
+
+    public int getGoals() {
+        return goals;
     }
 
     public char[][] getItems() {

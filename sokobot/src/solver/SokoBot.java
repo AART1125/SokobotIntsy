@@ -7,8 +7,7 @@ public class SokoBot {
   
 
   public String solveSokobanPuzzle(int width, int height, char[][] mapData, char[][] itemsData) {
-      char[] moves = {'u','d','l','r'};
-      String result = "dldr"; //resulting moves the robot needs to do to solve puzzle
+      char[] moves = {'u','d','l','r'}; //resulting moves the robot needs to do to solve puzzle
       Node state = new Node(height, width, mapData, itemsData);
       PriorityQueue<Node> frontier = new PriorityQueue<Node>(new CostCompare());
       HashSet<String> explored = new HashSet<String>();
@@ -22,18 +21,18 @@ public class SokoBot {
 
           state = frontier.poll();
 
-          if (state.goalFound()) 
-              return state.getPath();
-
+          if (state.goalFound()) {
+            return state.getPath();
+          }
+              
           explored.add(state.stringRep());
 
           for (char move : moves) {
             gen++;
             System.out.println(gen + " " + move);
-            Node child = new Node(state, move);
+            Node child = new Node(height, width, state, move);
 
             for (int i = 0; i < child.getItems().length; i++) {
-              System.out.print(child.getItems()[i]);
                 for (int j = 0; j < child.getItems()[0].length; j++) {
                   System.out.print(child.getItems()[i][j]);
                 }
