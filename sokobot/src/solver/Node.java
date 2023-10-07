@@ -14,6 +14,7 @@ public class Node implements Comparable<Node>{
     private Coordinates[] boxes, target;// Current positions of the boxes and targets in the map
     private char[][] map, items;//Representation of map and the movable items within it
     private int actualCost, heuristicCost;//Costs of this state
+    private int goals;//found goals
     private Node parentNode;//Node connected to the state
     private String path;// A string representation of the path taken to get to the current state
 
@@ -33,22 +34,33 @@ public class Node implements Comparable<Node>{
         this.actualCost = 0;
         this.heuristicCost = calculateHeuristicCost();
         this.parentNode = null;
+        this.path = "";
     }
 
     /**
-     * Constructor for the child node
+     * Constructor for the child node based on parent nodes desicion
      * @param parentNode the parent node of the state
      */
-    public Node(Node parentNode) {
+    public Node(Node parentNode, char move) {
+        
         this.parentNode = parentNode;
+        this.actualCost = parentNode.getActualCost() + 1;
+        this.path = parentNode.getPath() + move;
+        this.map = parentNode.getMap();
+ 
+        char[][] newMap= newItemState(parentNode, move);
+        this.items = new char[newMap.length][];
+        for (int i = 0; i < newMap.length; i++) {
+            this.items[i] = new char[newMap[i].length];
+            for (int j = 0; j < newMap[0].length; j++) {
+                this.items[i][j] = newMap[i][j];
+            }
+        }
 
-        this.player = parentNode.getPlayer();
-        this.boxes = parentNode.getBoxes();
+        this.player = playerPosition(this.map.length, this.map[0].length, this.items);
+        this.boxes = boxPosition(this.map.length, this.map[0].length, this.items);
         this.target = parentNode.getTarget();
 
-        this.map = parentNode.getMap();
-        this.items = parentNode.getItems();
-        this.actualCost = parentNode.getActualCost() + 1;
         this.heuristicCost = calculateHeuristicCost();
     }
 
@@ -72,6 +84,7 @@ public class Node implements Comparable<Node>{
 
         //create array of coordinates
         Coordinates[] positions = new Coordinates[targetcount];
+        this.goals = targetcount;
 
         for (int i = 0; i < poscount; i++) {
             positions[i] = new Coordinates(posX[i], posY[i]);
@@ -136,10 +149,137 @@ public class Node implements Comparable<Node>{
         return cost;
     }
 
+    public boolean goalFound(){
+        int goalCount = 0;
+        for (int i = 0; i < map.length; i++) {
+            for (int j = 0; j < map[0].length; j++) {
+                if (map[i][j] == items[i][j]){
+                    goalCount++;
+                }
+            }
+        }
+
+        if (goalCount == goals) {
+            return true;
+        }
+
+        return false;
+    }
+
     //Creates a new state based on the direction it decided to go to
-    private char[][] newState(Node state, char dir){
+    private char[][] newItemState(Node state, char move){
+        char[][] newState = new char[state.getItems().length][];//initialize the original state to change accordingly
+
+        for (int i = 0; i < newState.length; i++) {
+            newState[i] = new char[state.getItems()[i].length];
+            for (int j = 0; j < newState.length; j++) {
+                newState[i][j] = state.getItems()[i][j];
+            }
+        }
+
+        if (isMoveValid(state, move)) {
+            switch (move) {
+            case 'u':
+                System.out.println("can move up");
+                if (newState[state.getPlayer().getX() - 1][state.getPlayer().getY()] == ' ' ||
+                map[state.getPlayer().getX() - 1][state.getPlayer().getY()] == '.') {
+
+                newState[state.getPlayer().getX() - 1][state.getPlayer().getY()] = '@';
+
+                } else if (newState[state.getPlayer().getX() - 1][state.getPlayer().getY()] == '$') {
+
+                    actualCost++;
+                    
+                    if (newState[state.getPlayer().getX() - 2][state.getPlayer().getY()] == ' ' ||
+                        map[state.getPlayer().getX() - 2][state.getPlayer().getY()] == '.') {
+
+                        newState[state.getPlayer().getX() - 2][state.getPlayer().getY()] = '$';
+                        newState[state.getPlayer().getX() - 1][state.getPlayer().getY()] = '@';
+                    }
+                }
+            
+                newState[state.getPlayer().getX()][state.getPlayer().getY()] = ' ';
+
+                return newState;
+            
+            
+            case 'd':
+                System.out.println("can move down");
+                if (newState[state.getPlayer().getX() + 1][state.getPlayer().getY()] == ' ' ||
+                    map[state.getPlayer().getX() + 1][state.getPlayer().getY()] == '.') {
+
+                    newState[state.getPlayer().getX() + 1][state.getPlayer().getY()] = '@';
+
+                } else if (newState[state.getPlayer().getX() + 1][state.getPlayer().getY()] == '$') {
+
+                    actualCost++;
+                    
+                    if (newState[state.getPlayer().getX() + 2][state.getPlayer().getY()] == ' ' ||
+                        map[state.getPlayer().getX() + 2][state.getPlayer().getY()] == '.') {
+
+                        newState[state.getPlayer().getX() + 2][state.getPlayer().getY()] = '$';
+                        newState[state.getPlayer().getX() + 1][state.getPlayer().getY()] = '@';
+                    }
+                }
+                
+                newState[state.getPlayer().getX()][state.getPlayer().getY()] = ' ';
+
+                return newState;
+            
+            
+            case 'l':
+                System.out.println("can move left");
+                if (newState[state.getPlayer().getX()][state.getPlayer().getY() - 1] == ' ' ||
+                    map[state.getPlayer().getX()][state.getPlayer().getY() - 1] == '.') {
+
+                    newState[state.getPlayer().getX()][state.getPlayer().getY() - 1] = '@';
+
+                } else if (newState[state.getPlayer().getX()][state.getPlayer().getY() - 1] == '$') {
+
+                    actualCost++;
+                    
+                    if (newState[state.getPlayer().getX()][state.getPlayer().getY() - 2] == ' ' ||
+                        map[state.getPlayer().getX()][state.getPlayer().getY() - 2] == '.') {
+
+                        newState[state.getPlayer().getX()][state.getPlayer().getY() - 2] = '$';
+                        newState[state.getPlayer().getX()][state.getPlayer().getY() - 1] = '@';
+                    }
+                }
+                
+                newState[state.getPlayer().getX()][state.getPlayer().getY()] = ' ';
+
+                return newState;
+            
+            
+            case 'r':
+                System.out.println("can move right");
+                if (newState[state.getPlayer().getX()][state.getPlayer().getY() + 1] == ' ' ||
+                    map[state.getPlayer().getX()][state.getPlayer().getY() + 1] == '.') {
+
+                    newState[state.getPlayer().getX()][state.getPlayer().getY() + 1] = '@';
+
+                } else if (newState[state.getPlayer().getX()][state.getPlayer().getY() + 1] == '$') {
+
+                    actualCost++;
+                    
+                    if (newState[state.getPlayer().getX()][state.getPlayer().getY() + 2] == ' ' ||
+                        map[state.getPlayer().getX()][state.getPlayer().getY() + 2] == '.') {
+
+                        newState[state.getPlayer().getX()][state.getPlayer().getY() + 2] = '$';
+                        newState[state.getPlayer().getX()][state.getPlayer().getY() + 1] = '@';
+                    }
+                }
+                
+                newState[state.getPlayer().getX()][state.getPlayer().getY()] = ' ';
+                
+                return newState;
+            
+            }
+        } else {
+            System.out.println("invalid move");
+        }
         
-        return null;
+        return newState;
     }
 
     //Overided method of Comparable interface
@@ -154,45 +294,51 @@ public class Node implements Comparable<Node>{
         return -1;
     }
 
+    public String stringRep(){
+        String str = "";
+        for (int i = 0; i < map.length; i++) {
+            for (int j = 0; j < map[0].length; j++) {
+                if (map[i][j] == '#' || map[i][j] == '.') {
+                    str += map[i][j];
+                } else {
+                    str += items[i][j];
+                }
+            }
+        }
+        return str;
+    }
+
     //Checks if the possible movement is a valid one or not
-    public boolean isMoveValid(char move) {
+    public boolean isMoveValid(Node prev,char move) {
         switch (move) {
             case 'u':
-                if (map[player.getX() - 1][player.getY()] == '#' ||
-                    map[player.getX() - 2].length <= player.getY()) {
-                    return false;
-                } else {
+                if (map[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] != '#') {
                     return true;
+                } else {
+                    return false;
                 }
             case 'd':
-                if (map[player.getX() + 1][player.getY()] == '#' ||
-                    map[player.getX() + 2].length <= player.getY()) {
-                    return false;
-                } else {
+                if (map[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] != '#') {
                     return true;
+                } else {
+                    return false;
                 }
             case 'l':
-                if (map[player.getX()][player.getY() - 1] == '#' ||
-                    player.getY() <= 1) {
-                    return false;
-                } else {
+                if (map[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] != '#') {
                     return true;
+                } else {
+                    return false;
                 }
                 
             case 'r':
-                if (map[player.getX()][player.getY() + 1] == '#' ||
-                    map[player.getX() + 2].length <= player.getY() + 2) {
-                    return false;
-                } else {
+                if (map[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] != '#') {
                     return true;
+                } else {
+                    return false;
                 }
             default:
                 return false;
         }
-    }
-
-    public Node updateNewState() {
-        return null;
     }
 
     // Calculates the f function value of the node
@@ -218,6 +364,10 @@ public class Node implements Comparable<Node>{
 
     public char[][] getMap() {
         return map;
+    }
+
+    public String getPath() {
+        return path;
     }
 
     public Node getParentNode() {
