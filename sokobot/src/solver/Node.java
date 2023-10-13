@@ -177,7 +177,9 @@ public class Node implements Comparable<Node>{
             }
         }
 
-        if (isMoveValid(state, move)) {
+        Coordinates playerPosition = state.getPlayer();
+
+        if (playerPosition != null && isMoveValid(state, move)) {
             switch (move) {
             case 'u':
                 System.out.println("can move up");
