@@ -176,6 +176,7 @@ public class Node implements Comparable<Node>{
             }
         }
 
+        
         Coordinates playerPosition = state.getPlayer();
 
         if (playerPosition != null && isMoveValid(state, move)) {
