@@ -7,8 +7,7 @@ public class SokoBot {
   
 
   public String solveSokobanPuzzle(int width, int height, char[][] mapData, char[][] itemsData) {
-      char[] moves = {'u','d','l','r'};
-      String result = "dldr"; //resulting moves the robot needs to do to solve puzzle
+      char[] moves = {'u','d','l','r'}; //resulting moves the robot needs to do to solve puzzle
       Node state = new Node(height, width, mapData, itemsData);
       PriorityQueue<Node> frontier = new PriorityQueue<Node>(new CostCompare());
       HashSet<String> explored = new HashSet<String>();
@@ -22,26 +21,16 @@ public class SokoBot {
 
           state = frontier.poll();
 
-          if (state.goalFound()) 
-              return state.getPath();
-
+          if (state.goalFound()) {
+            return state.getPath();
+          }
+              
           explored.add(state.stringRep());
 
           for (char move : moves) {
             gen++;
             System.out.println(gen + " " + move);
-            Node child = new Node(state, move);
-
-            for (int i = 0; i < child.getItems().length; i++) {
-              System.out.print(child.getItems()[i]);
-                for (int j = 0; j < child.getItems()[0].length; j++) {
-                  System.out.print(child.getItems()[i][j]);
-                }
-              System.out.println("");
-            }
-
-            System.out.println(frontier.contains(child));
-            System.out.println(explored.contains(child.stringRep()));
+            Node child = new Node(height, width, state, move);            
 
             if (!frontier.contains(child) && !explored.contains(child.stringRep())) {
               frontier.add(child); 
@@ -50,7 +39,7 @@ public class SokoBot {
               int MDofPQ = 0;
 
               for (Object prev : frontier.toArray()) {
-                if (((Node)prev).equals(child)) {
+                if (((Node)prev).equal(child)) {
                   MDofPQ = ((Node)prev).getHeuristicCost() + ((Node)prev).getActualCost();
                 } else {
                   MDofPQ = -1;
@@ -59,6 +48,7 @@ public class SokoBot {
               if (MDofPQ > child.fValue()){
                 frontier.remove(child);
                 frontier.add(child);
+                
               } 
             }
           } else if (explored.contains(child.stringRep())){
