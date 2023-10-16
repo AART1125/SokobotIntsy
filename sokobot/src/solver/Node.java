@@ -40,7 +40,10 @@ public class Node implements Comparable<Node>{
 
     /**
      * Constructor for the child node based on parent nodes desicion
+     * @param height height of the map
+     * @param width width of the map
      * @param parentNode the parent node of the state
+     * @param move the move that was performed
      */
     public Node(int height, int width, Node parentNode, char move) {
         
@@ -149,6 +152,10 @@ public class Node implements Comparable<Node>{
         return cost;
     }
 
+    /**
+     * Checks if the goal was found by checking the map and item attributes of the object
+     * @return true or false
+     */
     public boolean goalFound(){
         int goalCount = 0;
         for (int i = 0; i < map.length; i++) {
@@ -176,10 +183,7 @@ public class Node implements Comparable<Node>{
             }
         }
 
-        
-        Coordinates playerPosition = state.getPlayer();
-
-        if (playerPosition != null && isMoveValid(state, move)) {
+        if (isMoveValid(state, move)) {
             switch (move) {
             case 'u':
                 if (newState[state.getPlayer().getX() - 1][state.getPlayer().getY()] == ' ' ||
@@ -282,7 +286,10 @@ public class Node implements Comparable<Node>{
         return newState;
     }
 
-    //Overided method of Comparable interface
+    /**
+     * {@Javadoc}
+     * Overidden function of the comparable interface
+     */
     @Override
     public int compareTo(Node node) {
         if (this.actualCost == node.getActualCost()) {
@@ -294,6 +301,10 @@ public class Node implements Comparable<Node>{
         return -1;
     }
 
+    /**
+     * Creates the string representation of the map for checking
+     * @return map string
+     */
     public String stringRep(){
         String str = "";
         for (int i = 0; i < map.length; i++) {
@@ -308,8 +319,8 @@ public class Node implements Comparable<Node>{
         return str;
     }
 
-    //Checks if the possible movement is a valid one or not
-    public boolean isMoveValid(Node prev,char move) {
+
+    private boolean isMoveValid(Node prev, char move) {
         switch (move) {
             case 'u':
                 if (map[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] != '#') {
@@ -341,6 +352,11 @@ public class Node implements Comparable<Node>{
         }
     }
 
+    /**
+     * Checks if the object (Node) has an equal string rep of the current node
+     * @param obj Object to be compared
+     * @return true or false
+     */
     public boolean equal(Object obj){
         if (obj == null || !(obj instanceof Node)) {
             return false;
@@ -353,47 +369,90 @@ public class Node implements Comparable<Node>{
         }
     }
 
-    // Calculates the f function value of the node
+    /**
+     * gets the sum of the actual cost and heuristic cost
+     * @return sum
+     */
     public int fValue(){
         return actualCost + heuristicCost;
     }
     
+    /**
+     * gets the coordinates of the boxes
+     * @return array of position of boxes
+     */
     public Coordinates[] getBoxes() {
         return boxes;
     }
 
+    /**
+     * gets the actual cost of the node
+     * @return actual cost
+     */
     public int getActualCost() {
         return actualCost;
     }
 
+    /**
+     * gets the heuristic cost of the node
+     * @return heuristic cost
+     */
     public int getHeuristicCost() {
         return heuristicCost;
     }
 
+    /**
+     * gets the number of goals in the node
+     * @return goals
+     */
     public int getGoals() {
         return goals;
     }
 
+    /**
+     * gets the mapping of the movable items in the node
+     * @return movable items
+     */
     public char[][] getItems() {
         return items;
     }
 
+    /**
+     * gets the main map of the node
+     * @return main map
+     */
     public char[][] getMap() {
         return map;
     }
 
+    /**
+     * gets the string path of what the current node has took
+     * @return current path representation
+     */
     public String getPath() {
         return path;
     }
 
+    /**
+     * gets the parent node of the node
+     * @return parent node
+     */
     public Node getParentNode() {
         return parentNode;
     }
 
+    /**
+     * gets the coordinates of the player on the map
+     * @return postion of player
+     */
     public Coordinates getPlayer() {
         return player;
     }
 
+    /**
+     * gets the coordinates of the targets in the map
+     * @return array of possitions of targets
+     */
     public Coordinates[] getTarget() {
         return target;
     }
