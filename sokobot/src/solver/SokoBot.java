@@ -15,46 +15,53 @@ public class SokoBot {
       frontier.add(state);
 
       while (true) {
-          if ((frontier.peek()) == null){
-              return "ududududuudududuudduudududuudududududu";
+          if (frontier.peek() == null) {
+            return "uddudududuududududuudududududududududuududududududuudududududuuddu";
           }
-
           state = frontier.poll();
 
+          
           if (state.goalFound()) {
             return state.getPath();
           }
               
           explored.add(state.stringRep());
-
+          
           for (char move : moves) {
-            gen++;
-            System.out.println(gen + " " + move);
-            Node child = new Node(height, width, state, move);            
+            
+            Node child = new Node(state, move);   
+            gen++;  
+            //System.out.println(move + " " + gen + " " + state.getHeuristicCost());
+            /*for (int i = 0; i < height; i++) {
+              System.out.print(child.getItems()[i][0]);
+              for (int j = 0; j < width; j++) {
+                System.out.print(child.getItems()[i][j]);
+              }
+              System.out.println();
+            }*/
 
             if (!frontier.contains(child) && !explored.contains(child.stringRep())) {
+              //System.out.println("added");
               frontier.add(child); 
-              System.out.println("Added state!");
-            } else if (frontier.contains(child)) {
-              int MDofPQ = 0;
-
-              for (Object prev : frontier.toArray()) {
-                if (((Node)prev).equal(child)) {
-                  MDofPQ = ((Node)prev).getHeuristicCost() + ((Node)prev).getActualCost();
-                } else {
-                  MDofPQ = -1;
-              }
-
-              if (MDofPQ > child.fValue()){
-                frontier.remove(child);
-                frontier.add(child);
-                
-              } 
+              
+            } else if(frontier.contains(child) && getStarMDFromPQ(frontier, child) > child.fValue()){
+              frontier.remove(child);
+              frontier.add(child);
+            } else {
+              //System.out.println("repeat");
+            } 
             }
-          } else if (explored.contains(child.stringRep())){
-            System.out.println("repeat");
-          }
+          } 
+          
         }
-      }
-    }
-}
+      
+        private int getStarMDFromPQ(PriorityQueue<Node> pq, Node comp) {
+            for(Object orig : pq.toArray()) {
+              if( ((Node) orig).equals(comp) ){
+                return ((Node)orig).fValue();
+            }
+           
+          }
+           return -1;
+        }}
+    

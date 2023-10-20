@@ -15,8 +15,10 @@ public class Node implements Comparable<Node>{
     private char[][] map, items;//Representation of map and the movable items within it
     private int actualCost, heuristicCost;//Costs of this state
     private int goals;//found goals
+    private int height, width;
     private Node parentNode;//Node connected to the state
     private String path;// A string representation of the path taken to get to the current state
+
 
     /**
      * Constructor for the root node
@@ -26,10 +28,12 @@ public class Node implements Comparable<Node>{
      * @param itemsData the representation of movable objects in the map
      */
     public Node(int height, int width, char[][] mapData, char[][] itemsData) {
-        this.player = playerPosition(height, width, itemsData);
-        this.boxes = boxPosition(height, width, itemsData);
+        this.height = height;
+        this.width = width;
+        this.player = playerPosition(itemsData);
+        this.boxes = boxPosition(itemsData);
         this.goals = 0;
-        this.target = targetPosition(height, width, mapData);
+        this.target = targetPosition(mapData);
         this.map = mapData;
         this.items = itemsData;
         this.actualCost = 0;
@@ -45,37 +49,38 @@ public class Node implements Comparable<Node>{
      * @param parentNode the parent node of the state
      * @param move the move that was performed
      */
-    public Node(int height, int width, Node parentNode, char move) {
-        
+    public Node(Node parentNode, char move) {
+        this.height = parentNode.getHeight();
+        this.width = parentNode.getWidth();
         this.parentNode = parentNode;
         this.actualCost = parentNode.getActualCost() + 1;
         this.path = parentNode.getPath() + move;
         this.map = parentNode.getMap();
  
-        char[][] newMap= newItemState(height, width, parentNode, move);
-        this.items = new char[newMap.length][newMap[0].length];
+        char[][] newMap= newItemState(parentNode, move);
+        this.items = new char[height][width];
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
                 this.items[i][j] = newMap[i][j];
             }
         }
         this.goals = 0;
-        this.player = playerPosition(height, width, this.items);
-        this.boxes = boxPosition(height, width, this.items);
+        this.player = playerPosition(this.items);
+        this.boxes = boxPosition(this.items);
         this.target = parentNode.getTarget();
 
         this.heuristicCost = calculateHeuristicCost();
     }
 
     //reads the position of target items
-    private Coordinates[] targetPosition(int height, int width,char[][] mapData){
+    private Coordinates[] targetPosition(char[][] mapData){
         int targetcount = 0, poscount = 0;
         int[] posX = new int[11], posY = new int[11];
 
         //checks map for targets
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                if (mapData[i][j] == '.') {
+                if (mapData[i][j] == '.' || mapData[i][j] == '*') {
                    posX[poscount] = i;
                    posY[poscount] = j;
                    poscount++;
@@ -97,18 +102,22 @@ public class Node implements Comparable<Node>{
     }
 
     //reads the position of the boxes
-    private Coordinates[] boxPosition(int height, int width,char[][] itemsData){
+    private Coordinates[] boxPosition(char[][] itemsData){
         int boxcount = 0, poscount = 0;
         int[] posX = new int[11], posY = new int[11];
 
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                if (itemsData[i][j] == '$') {
+                if (itemsData[i][j] == '$' || itemsData[i][j] == '*') {
                    posX[poscount] = i;
                    posY[poscount] = j;
                    poscount++;
 
                    boxcount++;
+                } 
+
+                if (itemsData[i][j] == '*') {
+                    goals++;
                 }
             }
         }
@@ -123,11 +132,11 @@ public class Node implements Comparable<Node>{
     }
     
     //reads the position of the player
-    private Coordinates playerPosition(int height, int width, char[][] itemsData){
+    private Coordinates playerPosition(char[][] itemsData){
 
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                if (itemsData[i][j] == '@') {
+                if (itemsData[i][j] == '@' || itemsData[i][j] == '+') {
                    return new Coordinates(i, j);
                 }
             }
@@ -144,7 +153,9 @@ public class Node implements Comparable<Node>{
             min = 100;
             for (Coordinates target : target) {
                 dist = Math.abs(boxes.getX() - target.getX()) + Math.abs(boxes.getY() - target.getY());
-                min = Math.min(min, dist);
+                if (dist < min) {
+                    min = dist;
+                }
             }
             cost += min;
         }
@@ -157,16 +168,14 @@ public class Node implements Comparable<Node>{
      * @return true or false
      */
     public boolean goalFound(){
-        int goalCount = 0;
-        for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[0].length; j++) {
-                if (map[i][j] == items[i][j]){
-                    goalCount++;
-                }
+        int goalcount = 0;
+        for (int i = 0; i < boxes.length; i++) {
+            if ((boxes[i].getX() == target[i].getX()) && (boxes[i].getY() == boxes[i].getY())) {
+                goalcount++;
             }
         }
 
-        if (goalCount == goals) {
+        if (goalcount == target.length) {
             return true;
         }
 
@@ -174,22 +183,138 @@ public class Node implements Comparable<Node>{
     }
 
     //Creates a new state based on the direction it decided to go to
-    private char[][] newItemState(int height, int width, Node state, char move){
+    /*
+     * REQUIRED TO FIX 
+     */
+    private char[][] newItemState(Node prev, char move){
         char[][] newState = new char[height][width];//initialize the original state to change accordingly
 
         for (int i = 0; i < height; i++) {
             for (int j = 0; j < width; j++) {
-                newState[i][j] = state.getItems()[i][j];
+                newState[i][j] = prev.getItems()[i][j];
             }
         }
 
-        if (isMoveValid(state, move)) {
+        if (isMoveValid(prev, move)) {
+            switch (move) {
+                case 'u':
+                    if ((map[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] == ' ' ||
+                        map[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] == '.') &&
+                        newState[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] != '$') {
+
+                        newState[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] = '@';
+
+                    }
+
+                    else if (newState[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] == '$') {
+                        this.actualCost++;
+
+                        if (map[prev.getPlayer().getX() - 2][prev.getPlayer().getY()] == ' ' ||
+                            map[prev.getPlayer().getX() - 2][prev.getPlayer().getY()] == '.') {
+                            
+                            newState[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] = '@';
+                            newState[prev.getPlayer().getX() - 2][prev.getPlayer().getY()] = '$';
+                        } 
+
+                    }
+                    
+                    newState[prev.getPlayer().getX()][prev.getPlayer().getY()] = ' ';
+
+                    break;
+                
+
+                case 'd':
+                    if ((map[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] == ' ' ||
+                        map[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] == '.') &&
+                        newState[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] != '$') {
+
+                        newState[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] = '@';
+
+                    }
+
+                    else if (newState[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] == '$') {
+                        this.actualCost++;
+
+                        if (map[prev.getPlayer().getX() + 2][prev.getPlayer().getY()] == ' ' ||
+                            map[prev.getPlayer().getX() + 2][prev.getPlayer().getY()] == '.') {
+                            
+                            newState[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] = '@';
+                            newState[prev.getPlayer().getX() + 2][prev.getPlayer().getY()] = '$';
+                        } 
+
+                    }
+                    
+                    newState[prev.getPlayer().getX()][prev.getPlayer().getY()] = ' ';
+                    
+                    break;
+
+                case 'l':
+                    if ((map[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] == ' ' ||
+                        map[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] == '.') &&
+                        newState[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] != '$') {
+
+                        newState[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] = '@';
+
+                    } 
+                    
+                    else if (newState[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] == '$') {
+                        this.actualCost++;
+
+                        if (map[prev.getPlayer().getX()][prev.getPlayer().getY() - 2] == ' ' ||
+                            map[prev.getPlayer().getX()][prev.getPlayer().getY() - 2] == '.') {
+                            
+                            newState[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] = '@';
+                            newState[prev.getPlayer().getX()][prev.getPlayer().getY() - 2] = '$';
+                        } 
+
+                    }
+                    
+                    newState[prev.getPlayer().getX()][prev.getPlayer().getY()] = ' ';
+                    
+                    break;
+
+                case 'r':
+                    if ((map[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] == ' ' ||
+                        map[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] == '.')  &&
+                        newState[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] != '$') {
+
+                        newState[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] = '@';
+
+                    }
+
+                    else if (newState[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] == '$') {
+                        this.actualCost++;
+
+                        if (map[prev.getPlayer().getX()][prev.getPlayer().getY() + 2] == ' ' ||
+                            map[prev.getPlayer().getX()][prev.getPlayer().getY() + 2] == '.') {
+                            
+                            newState[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] = '@';
+                            newState[prev.getPlayer().getX()][prev.getPlayer().getY() + 2] = '$';
+                        } 
+
+                    }
+                    
+                    newState[prev.getPlayer().getX()][prev.getPlayer().getY()] = ' ';
+
+                    break;
+            }
+            return newState;
+        }
+
+        /*if (isMoveValid(state, move)) {
             switch (move) {
             case 'u':
                 if (newState[state.getPlayer().getX() - 1][state.getPlayer().getY()] == ' ' ||
                 map[state.getPlayer().getX() - 1][state.getPlayer().getY()] == '.') {
 
-                newState[state.getPlayer().getX() - 1][state.getPlayer().getY()] = '@';
+                switch (newState[state.getPlayer().getX() - 1][state.getPlayer().getY()]) {
+                    case ' ':
+                        newState[state.getPlayer().getX() - 1][state.getPlayer().getY()] = '@';
+                        break;
+                    case '.':
+                        newState[state.getPlayer().getX() - 1][state.getPlayer().getY()] = '+';
+                        break;
+                }
 
                 } else if (newState[state.getPlayer().getX() - 1][state.getPlayer().getY()] == '$') {
 
@@ -197,7 +322,17 @@ public class Node implements Comparable<Node>{
                     
                     if (newState[state.getPlayer().getX() - 2][state.getPlayer().getY()] == ' ' ||
                         map[state.getPlayer().getX() - 2][state.getPlayer().getY()] == '.') {
-
+                        
+                        switch (newState[state.getPlayer().getX() - 2][state.getPlayer().getY()]){
+                            case ' ':
+                                newState[state.getPlayer().getX() - 2][state.getPlayer().getY()] = '$';
+                                newState[state.getPlayer().getX() - 1][state.getPlayer().getY()] = '@';
+                                break;
+                            case '.':
+                                newState[state.getPlayer().getX() - 2][state.getPlayer().getY()] = '*';
+                                newState[state.getPlayer().getX() - 1][state.getPlayer().getY()] = '@';
+                                break;
+                        }
                         newState[state.getPlayer().getX() - 2][state.getPlayer().getY()] = '$';
                         newState[state.getPlayer().getX() - 1][state.getPlayer().getY()] = '@';
                     }
@@ -281,7 +416,7 @@ public class Node implements Comparable<Node>{
                 return newState;
             
             }
-        } 
+        }*/ 
         
         return newState;
     }
@@ -321,35 +456,123 @@ public class Node implements Comparable<Node>{
 
 
     private boolean isMoveValid(Node prev, char move) {
+        char pos, pos2, item, item2;
         switch (move) {
             case 'u':
-                if (map[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] != '#') {
+                pos = map[prev.getPlayer().getX() - 1][prev.getPlayer().getY()];
+                item = prev.getItems()[prev.getPlayer().getX() - 1][prev.getPlayer().getY()];
+
+                if (pos == '#') {
+                    return false;
+                } else {
+                    pos2 = map[prev.getPlayer().getX() - 2][prev.getPlayer().getY()];
+                    item2 = prev.getItems()[prev.getPlayer().getX() - 2][prev.getPlayer().getY()];
+
+                    if (item == '$' && item2 != '$' && pos2 != '#') {
+                        return true;
+                    } else if (item == ' ') {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                    
+                }
+            case 'd':
+                pos = map[prev.getPlayer().getX() + 1][prev.getPlayer().getY()];
+                item = prev.getItems()[prev.getPlayer().getX() + 1][prev.getPlayer().getY()];
+
+                if (pos == '#') {
+                    return false;
+                } else {
+                    pos2 = map[prev.getPlayer().getX() + 2][prev.getPlayer().getY()];
+                    item2 = prev.getItems()[prev.getPlayer().getX() + 2][prev.getPlayer().getY()];
+
+                    if (item == '$' && item2 != '$' && pos2 != '#') {
+                        return true;
+                    } else if (item == ' ') {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                    
+                }
+            case 'l':
+                pos = map[prev.getPlayer().getX()][prev.getPlayer().getY() - 1];
+                item = prev.getItems()[prev.getPlayer().getX()][prev.getPlayer().getY() - 1];
+
+                if (pos == '#') {
+                    return false;
+                } else {
+                    pos2 = map[prev.getPlayer().getX()][prev.getPlayer().getY() - 2];
+                    item2 = prev.getItems()[prev.getPlayer().getX()][prev.getPlayer().getY() - 2];
+
+                    if (item == '$' && item2 != '$' && pos2 != '#') {
+                        return true;
+                    } else if (item == ' ') {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                    
+                }
+            case 'r':
+                pos = map[prev.getPlayer().getX()][prev.getPlayer().getY() + 1];
+                item = prev.getItems()[prev.getPlayer().getX()][prev.getPlayer().getY() + 1];
+
+                if (pos == '#') {
+                    return false;
+                } else {
+                    pos2 = map[prev.getPlayer().getX()][prev.getPlayer().getY() + 2];
+                    item2 = prev.getItems()[prev.getPlayer().getX()][prev.getPlayer().getY() + 2];
+
+                    if (item == '$' && item2 != '$' && pos2 != '#') {
+                        return true;
+                    } else if (item == ' ') {
+                        return true;
+                    } else {
+                        return false;
+                    }
+                    
+                }
+        }
+        return false;
+        /*switch (move) {
+            case 'u':
+                if (map[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] != '#' && 
+                    ((prev.getItems()[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] != '$' || prev.getItems()[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] != '*') &&
+                     (prev.getItems()[prev.getPlayer().getX() - 2][prev.getPlayer().getY()] != '$' || prev.getItems()[prev.getPlayer().getX() - 2][prev.getPlayer().getY()] != '*'))) {
                     return true;
                 } else {
                     return false;
                 }
             case 'd':
-                if (map[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] != '#') {
+                if (map[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] != '#' && 
+                    (prev.getItems()[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] != '$' || prev.getItems()[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] != '*' &&
+                     prev.getItems()[prev.getPlayer().getX() + 2][prev.getPlayer().getY()] != '$' || prev.getItems()[prev.getPlayer().getX() + 2][prev.getPlayer().getY()] != '*')) {
                     return true;
                 } else {
                     return false;
                 }
             case 'l':
-                if (map[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] != '#') {
+                if (map[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] != '#' && 
+                    (prev.getItems()[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] != '$' || prev.getItems()[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] != '*' &&
+                     prev.getItems()[prev.getPlayer().getX()][prev.getPlayer().getY() - 2] != '$' || prev.getItems()[prev.getPlayer().getX()][prev.getPlayer().getY() - 2] != '*')) {
                     return true;
                 } else {
                     return false;
                 }
                 
             case 'r':
-                if (map[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] != '#') {
+                if (map[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] != '#' && 
+                    (prev.getItems()[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] != '$' || prev.getItems()[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] != '*' &&
+                     prev.getItems()[prev.getPlayer().getX()][prev.getPlayer().getY() - 2] != '$' || prev.getItems()[prev.getPlayer().getX()][prev.getPlayer().getY() - 2] != '*')) {
                     return true;
                 } else {
                     return false;
                 }
             default:
                 return false;
-        }
+        }*/
     }
 
     /**
@@ -377,6 +600,22 @@ public class Node implements Comparable<Node>{
         return actualCost + heuristicCost;
     }
     
+    /**
+     * gets the height of the map
+     * @return height
+     */
+    public int getHeight() {
+        return height;
+    }
+
+    /**
+     * gets the width of the map
+     * @return width
+     */
+    public int getWidth() {
+        return width;
+    }
+
     /**
      * gets the coordinates of the boxes
      * @return array of position of boxes
