@@ -4,64 +4,61 @@ import java.util.HashSet;
 import java.util.PriorityQueue;
 
 public class SokoBot {
-  
 
-  public String solveSokobanPuzzle(int width, int height, char[][] mapData, char[][] itemsData) {
-      char[] moves = {'u','d','l','r'}; //resulting moves the robot needs to do to solve puzzle
-      Node state = new Node(height, width, mapData, itemsData);
-      PriorityQueue<Node> frontier = new PriorityQueue<Node>(new CostCompare());
-      HashSet<String> explored = new HashSet<String>();
-      int gen = 0;
-      frontier.add(state);
+    public String solveSokobanPuzzle(int width, int height, char[][] mapData, char[][] itemsData) {
+        char[] moves = {'u','d','l','r'};
+        Node node = new Node(height, width, mapData, itemsData);
+        PriorityQueue<Node> frontier = new PriorityQueue<>(11, new CostCompare());
+        HashSet<String> explored = new HashSet<String>();
+        int gen = 0;
 
-      while (true) {
-          if (frontier.peek() == null) {
-            return "uddudududuududududuudududududududududuududududududuudududududuuddu";
-          }
-          state = frontier.poll();
+        frontier.add(node);
 
-          
-          if (state.goalFound()) {
-            return state.getPath();
-          }
-              
-          explored.add(state.stringRep());
-          
-          for (char move : moves) {
-            
-            Node child = new Node(state, move);   
-            gen++;  
-            //System.out.println(move + " " + gen + " " + state.getHeuristicCost());
-            /*for (int i = 0; i < height; i++) {
-              System.out.print(child.getItems()[i][0]);
-              for (int j = 0; j < width; j++) {
-                System.out.print(child.getItems()[i][j]);
-              }
-              System.out.println();
-            }*/
+        while (!frontier.isEmpty()) {
+            node = frontier.poll();
 
-            if (!frontier.contains(child) && !explored.contains(child.stringRep())) {
-              //System.out.println("added");
-              frontier.add(child); 
-              
-            } else if(frontier.contains(child) && getStarMDFromPQ(frontier, child) > child.fValue()){
-              frontier.remove(child);
-              frontier.add(child);
-            } else {
-              //System.out.println("repeat");
-            } 
+            if (node.goalFound()) {
+                return node.getPath();
             }
-          } 
-          
+
+            explored.add(node.stringRep());
+
+            for (char move : moves) {
+                if (node.isMoveValid(move)) {
+                    Node child = new Node(node, move);
+                    gen++;
+                    //System.out.println(move + " " + gen + " " + state.getHeuristicCost());
+                    /*for (int i = 0; i < height; i++) {
+                        System.out.print(child.getItems()[i][0]);
+                        for (int j = 0; j < width; j++) {
+                            System.out.print(child.getItems()[i][j]);
+                        }
+                        System.out.println("");
+                    }*/
+
+                    if (!frontier.contains(child) && ! explored.contains(child.stringRep())) {
+                        frontier.add(child);
+                        //System.out.println("State Added");                    
+                    } else if (frontier.contains(child) && compareInTree(frontier, child) > child.fValue()){
+                        frontier.remove(child);
+                        frontier.add(child);
+                    } else {
+                        //System.out.println("State Repeated");
+                    }
+                } else {
+                    continue;
+                }
+            }
         }
-      
-        private int getStarMDFromPQ(PriorityQueue<Node> pq, Node comp) {
-            for(Object orig : pq.toArray()) {
-              if( ((Node) orig).equals(comp) ){
-                return ((Node)orig).fValue();
+      return "uuuuuuuuuuuuuuuuuuuuuuddddddddddddddddddddddddddddlllllllllllllllllllllllllllllllllllrrrrrrrrrrrrrrrrrrrrr";
+    }
+
+    private int compareInTree(PriorityQueue<Node> pq, Node node){
+        for (Object item : pq.toArray()) {
+            if (((Node)item).equals(node)) {
+                return ((Node)item).fValue();
             }
-           
-          }
-           return -1;
-        }}
-    
+        }
+        return -1;
+    }
+}

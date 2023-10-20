@@ -14,7 +14,6 @@ public class Node implements Comparable<Node>{
     private Coordinates[] boxes, target;// Current positions of the boxes and targets in the map
     private char[][] map, items;//Representation of map and the movable items within it
     private int actualCost, heuristicCost;//Costs of this state
-    private int goals;//found goals
     private int height, width;
     private Node parentNode;//Node connected to the state
     private String path;// A string representation of the path taken to get to the current state
@@ -32,7 +31,6 @@ public class Node implements Comparable<Node>{
         this.width = width;
         this.player = playerPosition(itemsData);
         this.boxes = boxPosition(itemsData);
-        this.goals = 0;
         this.target = targetPosition(mapData);
         this.map = mapData;
         this.items = itemsData;
@@ -64,7 +62,6 @@ public class Node implements Comparable<Node>{
                 this.items[i][j] = newMap[i][j];
             }
         }
-        this.goals = 0;
         this.player = playerPosition(this.items);
         this.boxes = boxPosition(this.items);
         this.target = parentNode.getTarget();
@@ -92,7 +89,6 @@ public class Node implements Comparable<Node>{
 
         //create array of coordinates
         Coordinates[] positions = new Coordinates[targetcount];
-        this.goals = targetcount;
 
         for (int i = 0; i < poscount; i++) {
             positions[i] = new Coordinates(posX[i], posY[i]);
@@ -116,9 +112,6 @@ public class Node implements Comparable<Node>{
                    boxcount++;
                 } 
 
-                if (itemsData[i][j] == '*') {
-                    goals++;
-                }
             }
         }
 
@@ -175,11 +168,7 @@ public class Node implements Comparable<Node>{
             }
         }
 
-        if (goalcount == target.length) {
-            return true;
-        }
-
-        return false;
+        return goalcount == target.length;
     }
 
     //Creates a new state based on the direction it decided to go to
@@ -195,111 +184,111 @@ public class Node implements Comparable<Node>{
             }
         }
 
-        if (isMoveValid(prev, move)) {
-            switch (move) {
-                case 'u':
-                    if ((map[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] == ' ' ||
-                        map[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] == '.') &&
-                        newState[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] != '$') {
+        
+        switch (move) {
+            case 'u':
+                if ((map[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] == ' ' ||
+                    map[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] == '.') &&
+                    newState[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] != '$') {
 
+                    newState[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] = '@';
+
+                }
+
+                else if (newState[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] == '$') {
+                    this.actualCost++;
+
+                    if (map[prev.getPlayer().getX() - 2][prev.getPlayer().getY()] == ' ' ||
+                        map[prev.getPlayer().getX() - 2][prev.getPlayer().getY()] == '.') {
+                        
                         newState[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] = '@';
-
-                    }
-
-                    else if (newState[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] == '$') {
-                        this.actualCost++;
-
-                        if (map[prev.getPlayer().getX() - 2][prev.getPlayer().getY()] == ' ' ||
-                            map[prev.getPlayer().getX() - 2][prev.getPlayer().getY()] == '.') {
-                            
-                            newState[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] = '@';
-                            newState[prev.getPlayer().getX() - 2][prev.getPlayer().getY()] = '$';
-                        } 
-
-                    }
-                    
-                    newState[prev.getPlayer().getX()][prev.getPlayer().getY()] = ' ';
-
-                    break;
-                
-
-                case 'd':
-                    if ((map[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] == ' ' ||
-                        map[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] == '.') &&
-                        newState[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] != '$') {
-
-                        newState[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] = '@';
-
-                    }
-
-                    else if (newState[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] == '$') {
-                        this.actualCost++;
-
-                        if (map[prev.getPlayer().getX() + 2][prev.getPlayer().getY()] == ' ' ||
-                            map[prev.getPlayer().getX() + 2][prev.getPlayer().getY()] == '.') {
-                            
-                            newState[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] = '@';
-                            newState[prev.getPlayer().getX() + 2][prev.getPlayer().getY()] = '$';
-                        } 
-
-                    }
-                    
-                    newState[prev.getPlayer().getX()][prev.getPlayer().getY()] = ' ';
-                    
-                    break;
-
-                case 'l':
-                    if ((map[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] == ' ' ||
-                        map[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] == '.') &&
-                        newState[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] != '$') {
-
-                        newState[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] = '@';
-
+                        newState[prev.getPlayer().getX() - 2][prev.getPlayer().getY()] = '$';
                     } 
-                    
-                    else if (newState[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] == '$') {
-                        this.actualCost++;
 
-                        if (map[prev.getPlayer().getX()][prev.getPlayer().getY() - 2] == ' ' ||
-                            map[prev.getPlayer().getX()][prev.getPlayer().getY() - 2] == '.') {
-                            
-                            newState[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] = '@';
-                            newState[prev.getPlayer().getX()][prev.getPlayer().getY() - 2] = '$';
-                        } 
+                }
+                
+                newState[prev.getPlayer().getX()][prev.getPlayer().getY()] = ' ';
 
-                    }
-                    
-                    newState[prev.getPlayer().getX()][prev.getPlayer().getY()] = ' ';
-                    
-                    break;
+                break;
+            
 
-                case 'r':
-                    if ((map[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] == ' ' ||
-                        map[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] == '.')  &&
-                        newState[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] != '$') {
+            case 'd':
+                if ((map[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] == ' ' ||
+                    map[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] == '.') &&
+                    newState[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] != '$') {
 
+                    newState[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] = '@';
+
+                }
+
+                else if (newState[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] == '$') {
+                    this.actualCost++;
+
+                    if (map[prev.getPlayer().getX() + 2][prev.getPlayer().getY()] == ' ' ||
+                        map[prev.getPlayer().getX() + 2][prev.getPlayer().getY()] == '.') {
+                        
+                        newState[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] = '@';
+                        newState[prev.getPlayer().getX() + 2][prev.getPlayer().getY()] = '$';
+                    } 
+
+                }
+                
+                newState[prev.getPlayer().getX()][prev.getPlayer().getY()] = ' ';
+                
+                break;
+
+            case 'l':
+                if ((map[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] == ' ' ||
+                    map[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] == '.') &&
+                    newState[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] != '$') {
+
+                    newState[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] = '@';
+
+                } 
+                
+                else if (newState[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] == '$') {
+                    this.actualCost++;
+
+                    if (map[prev.getPlayer().getX()][prev.getPlayer().getY() - 2] == ' ' ||
+                        map[prev.getPlayer().getX()][prev.getPlayer().getY() - 2] == '.') {
+                        
+                        newState[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] = '@';
+                        newState[prev.getPlayer().getX()][prev.getPlayer().getY() - 2] = '$';
+                    } 
+
+                }
+                
+                newState[prev.getPlayer().getX()][prev.getPlayer().getY()] = ' ';
+                
+                break;
+
+            case 'r':
+                if ((map[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] == ' ' ||
+                    map[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] == '.')  &&
+                    newState[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] != '$') {
+
+                    newState[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] = '@';
+
+                }
+
+                else if (newState[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] == '$') {
+                    this.actualCost++;
+
+                    if (map[prev.getPlayer().getX()][prev.getPlayer().getY() + 2] == ' ' ||
+                        map[prev.getPlayer().getX()][prev.getPlayer().getY() + 2] == '.') {
+                        
                         newState[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] = '@';
+                        newState[prev.getPlayer().getX()][prev.getPlayer().getY() + 2] = '$';
+                    } 
 
-                    }
+                }
+                
+                newState[prev.getPlayer().getX()][prev.getPlayer().getY()] = ' ';
 
-                    else if (newState[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] == '$') {
-                        this.actualCost++;
-
-                        if (map[prev.getPlayer().getX()][prev.getPlayer().getY() + 2] == ' ' ||
-                            map[prev.getPlayer().getX()][prev.getPlayer().getY() + 2] == '.') {
-                            
-                            newState[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] = '@';
-                            newState[prev.getPlayer().getX()][prev.getPlayer().getY() + 2] = '$';
-                        } 
-
-                    }
-                    
-                    newState[prev.getPlayer().getX()][prev.getPlayer().getY()] = ' ';
-
-                    break;
-            }
-            return newState;
+                break;
         }
+        return newState;
+        
 
         /*if (isMoveValid(state, move)) {
             switch (move) {
@@ -417,8 +406,6 @@ public class Node implements Comparable<Node>{
             
             }
         }*/ 
-        
-        return newState;
     }
 
     /**
@@ -455,18 +442,18 @@ public class Node implements Comparable<Node>{
     }
 
 
-    private boolean isMoveValid(Node prev, char move) {
+    public boolean isMoveValid(char move) {
         char pos, pos2, item, item2;
         switch (move) {
             case 'u':
-                pos = map[prev.getPlayer().getX() - 1][prev.getPlayer().getY()];
-                item = prev.getItems()[prev.getPlayer().getX() - 1][prev.getPlayer().getY()];
+                pos = map[this.getPlayer().getX() - 1][this.getPlayer().getY()];
+                item = this.getItems()[this.getPlayer().getX() - 1][this.getPlayer().getY()];
 
                 if (pos == '#') {
                     return false;
                 } else {
-                    pos2 = map[prev.getPlayer().getX() - 2][prev.getPlayer().getY()];
-                    item2 = prev.getItems()[prev.getPlayer().getX() - 2][prev.getPlayer().getY()];
+                    pos2 = map[this.getPlayer().getX() - 2][this.getPlayer().getY()];
+                    item2 = this.getItems()[this.getPlayer().getX() - 2][this.getPlayer().getY()];
 
                     if (item == '$' && item2 != '$' && pos2 != '#') {
                         return true;
@@ -478,14 +465,14 @@ public class Node implements Comparable<Node>{
                     
                 }
             case 'd':
-                pos = map[prev.getPlayer().getX() + 1][prev.getPlayer().getY()];
-                item = prev.getItems()[prev.getPlayer().getX() + 1][prev.getPlayer().getY()];
+                pos = map[this.getPlayer().getX() + 1][this.getPlayer().getY()];
+                item = this.getItems()[this.getPlayer().getX() + 1][this.getPlayer().getY()];
 
                 if (pos == '#') {
                     return false;
                 } else {
-                    pos2 = map[prev.getPlayer().getX() + 2][prev.getPlayer().getY()];
-                    item2 = prev.getItems()[prev.getPlayer().getX() + 2][prev.getPlayer().getY()];
+                    pos2 = map[this.getPlayer().getX() + 2][this.getPlayer().getY()];
+                    item2 = this.getItems()[this.getPlayer().getX() + 2][this.getPlayer().getY()];
 
                     if (item == '$' && item2 != '$' && pos2 != '#') {
                         return true;
@@ -497,14 +484,14 @@ public class Node implements Comparable<Node>{
                     
                 }
             case 'l':
-                pos = map[prev.getPlayer().getX()][prev.getPlayer().getY() - 1];
-                item = prev.getItems()[prev.getPlayer().getX()][prev.getPlayer().getY() - 1];
+                pos = map[this.getPlayer().getX()][this.getPlayer().getY() - 1];
+                item = this.getItems()[this.getPlayer().getX()][this.getPlayer().getY() - 1];
 
                 if (pos == '#') {
                     return false;
                 } else {
-                    pos2 = map[prev.getPlayer().getX()][prev.getPlayer().getY() - 2];
-                    item2 = prev.getItems()[prev.getPlayer().getX()][prev.getPlayer().getY() - 2];
+                    pos2 = map[this.getPlayer().getX()][this.getPlayer().getY() - 2];
+                    item2 = this.getItems()[this.getPlayer().getX()][this.getPlayer().getY() - 2];
 
                     if (item == '$' && item2 != '$' && pos2 != '#') {
                         return true;
@@ -516,14 +503,14 @@ public class Node implements Comparable<Node>{
                     
                 }
             case 'r':
-                pos = map[prev.getPlayer().getX()][prev.getPlayer().getY() + 1];
-                item = prev.getItems()[prev.getPlayer().getX()][prev.getPlayer().getY() + 1];
+                pos = map[this.getPlayer().getX()][this.getPlayer().getY() + 1];
+                item = this.getItems()[this.getPlayer().getX()][this.getPlayer().getY() + 1];
 
                 if (pos == '#') {
                     return false;
                 } else {
-                    pos2 = map[prev.getPlayer().getX()][prev.getPlayer().getY() + 2];
-                    item2 = prev.getItems()[prev.getPlayer().getX()][prev.getPlayer().getY() + 2];
+                    pos2 = map[this.getPlayer().getX()][this.getPlayer().getY() + 2];
+                    item2 = this.getItems()[this.getPlayer().getX()][this.getPlayer().getY() + 2];
 
                     if (item == '$' && item2 != '$' && pos2 != '#') {
                         return true;
@@ -575,13 +562,14 @@ public class Node implements Comparable<Node>{
         }*/
     }
 
+    @Override
     /**
      * Checks if the object (Node) has an equal string rep of the current node
      * @param obj Object to be compared
      * @return true or false
      */
-    public boolean equal(Object obj){
-        if (obj == null || !(obj instanceof Node)) {
+    public boolean equals(Object obj){
+        if (!(obj instanceof Node)) {
             return false;
         }
 
@@ -638,14 +626,6 @@ public class Node implements Comparable<Node>{
      */
     public int getHeuristicCost() {
         return heuristicCost;
-    }
-
-    /**
-     * gets the number of goals in the node
-     * @return goals
-     */
-    public int getGoals() {
-        return goals;
     }
 
     /**
