@@ -18,6 +18,7 @@ public class SokoBot {
             node = frontier.poll();
 
             if (node.goalFound()) {
+                System.out.println(node.getPath());
                 return node.getPath();
             }
 
@@ -27,7 +28,7 @@ public class SokoBot {
                 if (node.isMoveValid(move)) {
                     Node child = new Node(node, move);
                     gen++;
-                    //System.out.println(move + " " + gen + " " + state.getHeuristicCost());
+                    //System.out.println(move + " " + gen + " " + node.getHeuristicCost());
                     /*for (int i = 0; i < height; i++) {
                         System.out.print(child.getItems()[i][0]);
                         for (int j = 0; j < width; j++) {
@@ -45,12 +46,10 @@ public class SokoBot {
                     } else {
                         //System.out.println("State Repeated");
                     }
-                } else {
-                    continue;
-                }
+                } 
             }
         }
-      return "uuuuuuuuuuuuuuuuuuuuuuddddddddddddddddddddddddddddlllllllllllllllllllllllllllllllllllrrrrrrrrrrrrrrrrrrrrr";
+      return node.getPath();
     }
 
     private int compareInTree(PriorityQueue<Node> pq, Node node){

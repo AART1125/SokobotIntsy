@@ -162,8 +162,8 @@ public class Node implements Comparable<Node>{
      */
     public boolean goalFound(){
         int goalcount = 0;
-        for (int i = 0; i < boxes.length; i++) {
-            if ((boxes[i].getX() == target[i].getX()) && (boxes[i].getY() == boxes[i].getY())) {
+        for (int i = 0; i < target.length; i++) {
+            if ((boxes[i].getX() == target[i].getX()) && (boxes[i].getY() == target[i].getY())) {
                 goalcount++;
             }
         }
@@ -196,7 +196,7 @@ public class Node implements Comparable<Node>{
                 }
 
                 else if (newState[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] == '$') {
-                    this.actualCost++;
+                    actualCost++;
 
                     if (map[prev.getPlayer().getX() - 2][prev.getPlayer().getY()] == ' ' ||
                         map[prev.getPlayer().getX() - 2][prev.getPlayer().getY()] == '.') {
@@ -222,7 +222,7 @@ public class Node implements Comparable<Node>{
                 }
 
                 else if (newState[prev.getPlayer().getX() + 1][prev.getPlayer().getY()] == '$') {
-                    this.actualCost++;
+                    actualCost++;
 
                     if (map[prev.getPlayer().getX() + 2][prev.getPlayer().getY()] == ' ' ||
                         map[prev.getPlayer().getX() + 2][prev.getPlayer().getY()] == '.') {
@@ -247,7 +247,7 @@ public class Node implements Comparable<Node>{
                 } 
                 
                 else if (newState[prev.getPlayer().getX()][prev.getPlayer().getY() - 1] == '$') {
-                    this.actualCost++;
+                    actualCost++;
 
                     if (map[prev.getPlayer().getX()][prev.getPlayer().getY() - 2] == ' ' ||
                         map[prev.getPlayer().getX()][prev.getPlayer().getY() - 2] == '.') {
@@ -272,7 +272,7 @@ public class Node implements Comparable<Node>{
                 }
 
                 else if (newState[prev.getPlayer().getX()][prev.getPlayer().getY() + 1] == '$') {
-                    this.actualCost++;
+                    actualCost++;
 
                     if (map[prev.getPlayer().getX()][prev.getPlayer().getY() + 2] == ' ' ||
                         map[prev.getPlayer().getX()][prev.getPlayer().getY() + 2] == '.') {
