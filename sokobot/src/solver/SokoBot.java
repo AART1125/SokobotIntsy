@@ -9,7 +9,7 @@ public class SokoBot {
         char[] moves = {'u','d','l','r'};
         Node node = new Node(height, width, mapData, itemsData);
         PriorityQueue<Node> frontier = new PriorityQueue<>(11, new CostCompare());
-        HashSet<String> explored = new HashSet<String>();
+        HashSet<Node> explored = new HashSet<Node>();
         int gen = 0;
 
         frontier.add(node);
@@ -22,7 +22,7 @@ public class SokoBot {
                 return node.getPath();
             }
 
-            explored.add(node.stringRep());
+            explored.add(node);
 
             for (char move : moves) {
                 if (node.isMoveValid(move) && !node.isDeadloack(move)) {
@@ -37,10 +37,10 @@ public class SokoBot {
                         System.out.println("");
                     }*/
 
-                    if (!frontier.contains(child) && ! explored.contains(child.stringRep())) {
+                    if (!frontier.contains(child) && ! explored.contains(child)) {
                         frontier.add(child);
                         //System.out.println("State Added");                    
-                    } else if (frontier.contains(child) && compareInTree(frontier, child) > child.getHeuristicCost()){
+                    } else if (frontier.contains(child) && compareInTree(frontier, child) > child.fValue()){
                         frontier.remove(child);
                         frontier.add(child);
                     } else {
@@ -55,7 +55,7 @@ public class SokoBot {
     private int compareInTree(PriorityQueue<Node> pq, Node node){
         for (Object item : pq.toArray()) {
             if (((Node)item).equals(node)) {
-                return ((Node)item).getHeuristicCost();
+                return ((Node)item).fValue();
             }
         }
         return -1;

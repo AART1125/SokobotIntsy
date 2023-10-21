@@ -9,7 +9,7 @@ import java.util.ArrayList;
  * box position, target position, and the cost of the state. This class is using the comparable interface
  * in order to be used for the priority queue class in searching for the optimal path for the bot.
  */
-public class Node implements Comparable<Node>{
+public class Node{
 
     private Coordinates player;//Current position of the player in the map
     private Coordinates[] boxes, target;// Current positions of the boxes and targets in the map
@@ -327,21 +327,6 @@ public class Node implements Comparable<Node>{
     }
 
     /**
-     * {@Javadoc}
-     * Overidden function of the comparable interface
-     */
-    @Override
-    public int compareTo(Node node) {
-        if (this.getActualCost() == node.getActualCost()) {
-            return 0;
-        } else if (this.getActualCost() < node.getActualCost()) {
-            return 1;
-        }
-
-        return -1;
-    }
-
-    /**
      * Creates the string representation of the map for checking
      * @return map string
      */
@@ -493,6 +478,11 @@ public class Node implements Comparable<Node>{
         }
         return false;
     }
+
+    @Override
+    public int hashCode(){
+        return getItems().hashCode();
+    }
     
     /**
      * Checks if the object (Node) has an equal string rep of the current node
@@ -507,9 +497,8 @@ public class Node implements Comparable<Node>{
 
         if (((Node)obj).stringRep().equals(this.stringRep())) {
             return true;
-        }
-        
-        return false;
+        } else 
+            return false;
         
     }
 
