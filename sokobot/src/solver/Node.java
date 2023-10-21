@@ -161,20 +161,39 @@ public class Node{
         return positions;
     }*/
 
-    //Calculates the current heuristic cost of the state using the Manhattan Distance
-    private int calculateHeuristicCost(){
-        int cost = 0, minDist;
+    // private int calculateHeuristicCost(){
+    //     int cost = 0, minDist;
 
-        for (Coordinates boxes : boxes) {
-            minDist = Integer.MAX_VALUE;
+    //     for (Coordinates boxes : boxes) {
+    //         minDist = Integer.MAX_VALUE;
+    //         for (Coordinates target : target) {
+    //             int dist = Math.abs(boxes.getX() - target.getX()) + Math.abs(boxes.getY() - target.getY());
+    //             minDist = Math.min(minDist,dist);
+    //         }
+    //         cost += minDist;
+    //     }
+        
+    //     return cost;
+    // }
+
+    //Calculates the current heuristic cost of the state using the Manhattan Distance
+    private int calculateHeuristicCost() {
+        int cost = 0;
+
+        for (Coordinates box : boxes) {
+            int minDist = Integer.MAX_VALUE;
             for (Coordinates target : target) {
-                int dist = Math.abs(boxes.getX() - target.getX()) + Math.abs(boxes.getY() - target.getY());
-                minDist = Math.min(minDist,dist);
+                int dist = manhattanDistance(box, target);
+                minDist = Math.min(minDist, dist);
             }
             cost += minDist;
         }
-        
+
         return cost;
+    }
+
+    private int manhattanDistance(Coordinates from, Coordinates to) {
+        return Math.abs(from.getX() - to.getX()) + Math.abs(from.getY() - to.getY());
     }
 
     /**

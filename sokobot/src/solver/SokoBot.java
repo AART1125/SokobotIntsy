@@ -45,11 +45,20 @@ public class SokoBot {
                         System.out.println("");
                     }*/
 
-                    if (!openList.contains(child) && ! closedList.contains(child)) {//add child to open list
-                        openList.add(child);                    
-                    } else if (openList.contains(child) && compareInGraph(openList, child) > child.priorityCosts()){//check if child is present in list, if yes, remove and readd child for queuing
-                        openList.remove(child);
-                        openList.add(child);
+                    // if (!openList.contains(child) && ! closedList.contains(child)) {//add child to open list
+                    //     openList.add(child);                    
+                    // } else if (openList.contains(child) && compareInGraph(openList, child) > child.priorityCosts()){//check if child is present in list, if yes, remove and readd child for queuing
+                    //     openList.remove(child);
+                    //     openList.add(child);
+                    // }
+                    
+                    if (!closedList.contains(child) || (openList.contains(child) && compareInGraph(openList, child) > child.priorityCosts())) {
+                        if (!openList.contains(child)) {
+                            openList.add(child);
+                        } else {
+                            openList.remove(child);
+                            openList.add(child);
+                        }
                     }
                 } 
             }
