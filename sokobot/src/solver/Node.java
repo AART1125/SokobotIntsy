@@ -325,6 +325,7 @@ public class Node{
      */
     public boolean isFreezeDeadloack() {
         int blocked = 0;
+        int blocked = 0;
         for (Coordinates box : boxes) {
             if ((map[box.getX() - 1][box.getY()] == '#' && items[box.getX() - 1][box.getY()] == '$') || // !upBlocked
                 (map[box.getX() + 1][box.getY()] == '#' && items[box.getX() + 1][box.getY()] == '$') || // !downBlocked
