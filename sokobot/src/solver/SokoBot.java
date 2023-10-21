@@ -18,7 +18,7 @@ public class SokoBot {
             node = frontier.poll();
 
             if (node.goalFound()) {
-                System.out.println(node.getPath());
+                System.out.println("path: " + node.getPath());
                 return node.getPath();
             }
 
@@ -40,8 +40,7 @@ public class SokoBot {
                         }*/
 
                         if (!frontier.contains(child) && ! explored.contains(child)) {
-                            frontier.add(child);
-                            //System.out.println("State Added");                    
+                            frontier.add(child);                   
                         } else if (frontier.contains(child) && compareInTree(frontier, child) > child.fValue()){
                             frontier.remove(child);
                             frontier.add(child);

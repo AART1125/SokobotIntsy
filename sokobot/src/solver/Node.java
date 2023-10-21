@@ -339,14 +339,17 @@ public class Node{
      * @return true or false
      */
     public boolean isFreezeDeadloack() {
+        int blocked = 0;
         for (Coordinates box : boxes) {
-            if ((map[box.getX() - 1][box.getY()] != '#' && items[box.getX() - 1][box.getY()] != '$') ||
-                (map[box.getX() + 1][box.getY()] != '#' && items[box.getX() + 1][box.getY()] != '$') ||
-                (map[box.getX()][box.getY() - 1] != '#' && items[box.getX()][box.getY() - 1] != '$') ||
-                (map[box.getX()][box.getY() + 1] != '#' && items[box.getX()][box.getY() + 1] != '$')) {
+            if ((map[box.getX() - 1][box.getY()] != '#' && items[box.getX() - 1][box.getY()] != '$') || // !upBlocked
+                (map[box.getX() + 1][box.getY()] != '#' && items[box.getX() + 1][box.getY()] != '$') || // !downBlocked
+                (map[box.getX()][box.getY() - 1] != '#' && items[box.getX()][box.getY() - 1] != '$') || // !leftBlocked
+                (map[box.getX()][box.getY() + 1] != '#' && items[box.getX()][box.getY() + 1] != '$')) { // !rightBlocked
                 continue;
             } else {
-                return true;
+                blocked++;
+                if(blocked == items.length - 1 )
+                    return true;
             }
         }
         return false;
