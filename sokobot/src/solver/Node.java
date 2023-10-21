@@ -160,6 +160,11 @@ public class Node implements Comparable<Node>{
      * Checks if the goal was found by checking the map and item attributes of the object
      * @return true or false
      */
+    /*
+     * Originally : (boxes[i].getX() == target[i].getX()) && (boxes[i].getY() == boxes[i].getY()) // works
+     * Changed to : (boxes[i].getX() == target[i].getX()) && (boxes[i].getY() == target[i].getY()) // does not work
+     * Correct logic but queue becomes empty before completion
+     */
     public boolean goalFound(){
         int goalcount = 0;
         for (int i = 0; i < target.length; i++) {
