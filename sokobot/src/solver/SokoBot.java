@@ -25,24 +25,29 @@ public class SokoBot {
             explored.add(node);
 
             for (char move : moves) {
-                if (node.isMoveValid(move) && !node.isDeadloack(move)) {
+                if (node.isMoveValid(move)) {
                     Node child = new Node(node, move);
                     gen++;
-                    //System.out.println(move + " " + gen + " " + node.getHeuristicCost());
-                    /*for (int i = 0; i < height; i++) {
-                        System.out.print(child.getItems()[i][0]);
-                        for (int j = 0; j < width; j++) {
-                            System.out.print(child.getItems()[i][j]);
-                        }
-                        System.out.println("");
-                    }*/
+                    if (!child.isFreezeDeadloack()) {
+                        //System.out.println(gen);
+                        //System.out.println(move + " " + gen + " " + node.getHeuristicCost());
+                        /*for (int i = 0; i < height; i++) {
+                            System.out.print(child.getItems()[i][0]);
+                            for (int j = 0; j < width; j++) {
+                                System.out.print(child.getItems()[i][j]);
+                            }
+                            System.out.println("");
+                        }*/
 
-                    if (!frontier.contains(child) && ! explored.contains(child.stringRep())) {
-                        frontier.add(child);
-                        //System.out.println("State Added");                    
-                    } else if (frontier.contains(child) && compareInTree(frontier, child) > child.fValue()){
-                        frontier.remove(child);
-                        frontier.add(child);
+                        if (!frontier.contains(child) && ! explored.contains(child)) {
+                            frontier.add(child);
+                            //System.out.println("State Added");                    
+                        } else if (frontier.contains(child) && compareInTree(frontier, child) > child.fValue()){
+                            frontier.remove(child);
+                            frontier.add(child);
+                        } else {
+                            //System.out.println("State Repeated");
+                        }
                     }
                 } 
             }
@@ -50,10 +55,10 @@ public class SokoBot {
       return node.getPath();
     }
 
-    private int compareInTree(PriorityQueue<Node> pq, Node node){
-        for (Node item : pq) {
-            if (item.equals(node)) {
-                return item.fValue();
+    private static int compareInTree(PriorityQueue<Node> pq, Node node){
+        for (Object item : pq.toArray()) {
+            if (((Node)item).equals(node)) {
+                return ((Node)item).fValue();
             }
         }
         return -1;

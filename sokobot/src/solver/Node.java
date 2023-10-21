@@ -1,8 +1,8 @@
 package solver;
 
 import java.lang.Math;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 
 /**
  * Represents the current/possible states of the game. Goal of the game is to put all boxes in its 
@@ -14,7 +14,7 @@ public class Node{
 
     private Coordinates player;//Current position of the player in the map
     private Coordinates[] boxes, target;// Current positions of the boxes and targets in the map
-    private ArrayList<Coordinates> deadlockPosition;// gets the deadlocks in the map
+    private HashSet<Coordinates> obstacles;// gets the deadlocks in the map
     private char[][] map, items;//Representation of map and the movable items within it
     private int actualCost, heuristicCost;//Costs of this state
     private int height, width;// height and width of the map
@@ -35,8 +35,8 @@ public class Node{
         this.player = playerPosition(itemsData);
         this.boxes = boxPosition(itemsData);
         this.target = targetPosition(mapData);
-        this.deadlockPosition = deadlocks(mapData);
         this.map = mapData;
+        //this.obstacles = simpleDeadlock();
         this.items = itemsData;
         this.actualCost = 0;
         this.heuristicCost = calculateHeuristicCost();
@@ -55,7 +55,7 @@ public class Node{
         this.height = parentNode.getHeight();
         this.width = parentNode.getWidth();
         this.parentNode = parentNode;
-        this.deadlockPosition = parentNode.getDeadlockPosition();
+        //this.obstacles = parentNode.getobstacles();
         this.actualCost = parentNode.getActualCost() + 1;
         this.path = parentNode.getPath() + move;
         this.map = parentNode.getMap();
@@ -143,31 +143,25 @@ public class Node{
         return null;
     }
 
-    private ArrayList<Coordinates> deadlocks(char[][] mapData){
-        ArrayList<Coordinates> positions = new ArrayList<Coordinates>();
+    /*private HashSet<Coordinates> simpleDeadlock() throws ArrayIndexOutOfBoundsException{
+        HashSet<Coordinates> positions = new HashSet<Coordinates>();
 
-        for (int i = 1; i < height - 1; i++) {
-            for (int j = 1; j < width - 1; j++) {
-                boolean corner = true;
-                for (int k = -1; k <= 1; k++) {
-                    for (int l = -1; l <= 1; l++) {
-                        if (mapData[i+k][j+l] != '#') {
-                            corner = false;
-                            break;
-                        }
+        for (Coordinates goal : target) {
+            for (int i = 1; i <= height; i++) {
+                for (int j = 1; j <= width; j++) {
+                    if (map[goal.getX()+i][goal.getY()+j] == ' ' || map[goal.getX()+i][goal.getY()+j] == '#') {
+                        positions.add(new Coordinates(goal.getX() + i, goal.getY() + j));
+                    } 
+                    
+                    if (map[goal.getX()-i][goal.getY()-j] == ' ' || map[goal.getX()+i][goal.getY()-j] == '#') {
+                        positions.add(new Coordinates(goal.getX() - i, goal.getY() - j));
                     }
-                    if (!corner) {
-                        break;
-                    }
-                }
-                if (corner) {
-                    positions.add(new Coordinates(i, j));
                 }
             }
         }
 
         return positions;
-    }
+    }*/
 
     //Calculates the current heuristic cost of the state using the Manhattan Distance
     private int calculateHeuristicCost(){
@@ -207,7 +201,7 @@ public class Node{
 
     //Creates a new state based on the direction it decided to go to
     /*
-     * REQUIRED TO FIX 
+     * fixed 
      */
     private char[][] newItemState(Node prev, char move){
         char[][] newState = new char[height][width];//initialize the original state to change accordingly
@@ -333,11 +327,7 @@ public class Node{
         String str = "";
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[0].length; j++) {
-                if (map[i][j] == '#' || map[i][j] == '.') {
-                    str += map[i][j];
-                } else {
-                    str += items[i][j];
-                }
+                str += items[i][j];
             }
         }
         return str;
@@ -348,53 +338,63 @@ public class Node{
      * @param move direction of the movement
      * @return true or false
      */
-    public boolean isDeadloack(char move) {
-        switch (move) {
+    public boolean isFreezeDeadloack() {
+        for (Coordinates box : boxes) {
+            if ((map[box.getX() - 1][box.getY()] != '#' && items[box.getX() - 1][box.getY()] != '$') ||
+                (map[box.getX() + 1][box.getY()] != '#' && items[box.getX() + 1][box.getY()] != '$') ||
+                (map[box.getX()][box.getY() - 1] != '#' && items[box.getX()][box.getY() - 1] != '$') ||
+                (map[box.getX()][box.getY() + 1] != '#' && items[box.getX()][box.getY() + 1] != '$')) {
+                continue;
+            } else {
+                return true;
+            }
+        }
+        return false;
+        /*switch (move) {
             case 'u':
-                for (Coordinates corner : deadlockPosition) {
-                    for (Coordinates boxes : boxes) {
-                        if (((boxes.getX() - 2) == corner.getX()) && (boxes.getY() == corner.getY())) {
-                            return true;
-                        }
+                for (Coordinates box : boxes) {
+                    if (map[box.getX() - 1][box.getY()] == '#' || items[box.getX() - 1][box.getY()] == '$') {
+                        return true;
                     }
-                    
                 }
                 return false;
             
             case 'd':
-                for (Coordinates corner : deadlockPosition) {
-                    for (Coordinates boxes : boxes) {
-                        if (((boxes.getX() + 2) == corner.getX()) && (boxes.getY() == corner.getY())) {
-                            return true;
-                        }
+                for (Coordinates box : boxes) {
+                    if (map[box.getX() + 1][box.getY()] == '#' || items[box.getX() + 1][box.getY()] == '$') {
+                        return true;
                     }
                 }
                 return false;
             
             case 'l':
-                for (Coordinates corner : deadlockPosition) {
-                    for (Coordinates boxes : boxes) {
-                        if ((boxes.getX() == corner.getX()) && ((boxes.getY() - 2) == corner.getY())) {
-                            return true;
-                        }
+                for (Coordinates box : boxes) {
+                    if (map[box.getX()][box.getY() - 1] == '#' || items[box.getX()][box.getY() - 1] == '$') {
+                        return true;
                     }
                 }
                 return false;
-            
+
             case 'r':
-                for (Coordinates corner : deadlockPosition) {
-                    for (Coordinates boxes : boxes) {
-                        if ((boxes.getX() == corner.getX()) && ((boxes.getY() + 2) == corner.getY())) {
-                            return true;
-                        }
+                for (Coordinates box : boxes) {
+                    if (map[box.getX()][box.getY() + 1] == '#' || items[box.getX()][box.getY() + 1] == '$') {
+                        return true;
                     }
                 }
                 return false;
         }
-        return true;
+        return true;*/
     }
 
 
+    /**
+     * checks if move is valid
+     * @param move direction of state
+     * @return true or false
+     */
+    /*
+     * Constant time
+     */
     public boolean isMoveValid(char move) {
         char pos, pos2, item, item2;
         switch (move) {
@@ -478,9 +478,8 @@ public class Node{
         return false;
     }
 
-    @Override
-    public int hashCode(){
-        return getItems().hashCode();
+    public int hashCode() {
+        return stringRep().hashCode() * heuristicCost * 2;
     }
     
     /**
@@ -491,7 +490,7 @@ public class Node{
     @Override
     public boolean equals(Object obj){
         if (this == obj) {
-        return true;
+            return true;
         }
         if (obj == null || getClass() != obj.getClass()) {
             return false;
@@ -597,8 +596,8 @@ public class Node{
         return target;
     }
 
-    public ArrayList<Coordinates> getDeadlockPosition() {
-        return deadlockPosition;
+    public HashSet<Coordinates> getobstacles() {
+        return obstacles;
     }
 
 }
