@@ -2,6 +2,7 @@ package solver;
 
 import java.lang.Math;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Represents the current/possible states of the game. Goal of the game is to put all boxes in its 
@@ -170,17 +171,15 @@ public class Node{
 
     //Calculates the current heuristic cost of the state using the Manhattan Distance
     private int calculateHeuristicCost(){
-        int cost = 0, min = 0, dist = 0;
+        int cost = 0, minDist;
 
         for (Coordinates boxes : boxes) {
-            min = 100;
+            minDist = Integer.MAX_VALUE;
             for (Coordinates target : target) {
-                dist = Math.abs(boxes.getX() - target.getX()) + Math.abs(boxes.getY() - target.getY());
-                if (dist < min) {
-                    min = dist;
-                }
+                int dist = Math.abs(boxes.getX() - target.getX()) + Math.abs(boxes.getY() - target.getY());
+                minDist = Math.min(minDist,dist);
             }
-            cost += min;
+            cost += minDist;
         }
         
         return cost;
@@ -491,14 +490,14 @@ public class Node{
      */
     @Override
     public boolean equals(Object obj){
-        if (!(obj instanceof Node)) {
+        if (this == obj) {
+        return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-
-        if (((Node)obj).stringRep().equals(this.stringRep())) {
-            return true;
-        } else 
-            return false;
+        Node other = (Node) obj;
+        return Arrays.deepEquals(items, other.items);
         
     }
 

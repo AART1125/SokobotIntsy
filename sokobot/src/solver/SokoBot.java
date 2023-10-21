@@ -37,14 +37,12 @@ public class SokoBot {
                         System.out.println("");
                     }*/
 
-                    if (!frontier.contains(child) && ! explored.contains(child)) {
+                    if (!frontier.contains(child) && ! explored.contains(child.stringRep())) {
                         frontier.add(child);
                         //System.out.println("State Added");                    
                     } else if (frontier.contains(child) && compareInTree(frontier, child) > child.fValue()){
                         frontier.remove(child);
                         frontier.add(child);
-                    } else {
-                        //System.out.println("State Repeated");
                     }
                 } 
             }
@@ -53,9 +51,9 @@ public class SokoBot {
     }
 
     private int compareInTree(PriorityQueue<Node> pq, Node node){
-        for (Object item : pq.toArray()) {
-            if (((Node)item).equals(node)) {
-                return ((Node)item).fValue();
+        for (Node item : pq) {
+            if (item.equals(node)) {
+                return item.fValue();
             }
         }
         return -1;
