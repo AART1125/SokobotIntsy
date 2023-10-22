@@ -343,29 +343,6 @@ public class Node{
     }
 
     /**
-     * Checks for deadlock results
-     * @param move direction of the movement
-     * @return true or false
-     */
-    public boolean isFreezeDeadloack() {
-        int blocked = 0;
-        for (Coordinates box : boxes) {
-            if ((map[box.getX() - 1][box.getY()] != '#' || items[box.getX() - 1][box.getY()] != '$') && // !upBlocked
-                (map[box.getX() + 1][box.getY()] != '#' || items[box.getX() + 1][box.getY()] != '$') && // !downBlocked
-                (map[box.getX()][box.getY() - 1] != '#' || items[box.getX()][box.getY() - 1] != '$') && // !leftBlocked
-                (map[box.getX()][box.getY() + 1] != '#' || items[box.getX()][box.getY() + 1] != '$')) { // !rightBlocked
-                continue;
-            } else {
-                blocked++;
-                if(blocked == boxes.length)
-                    return true;
-            }
-        }
-        return false;
-    }
-
-
-    /**
      * checks if move is valid
      * @param move direction of state
      * @return true or false

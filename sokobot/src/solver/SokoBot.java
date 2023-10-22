@@ -31,7 +31,7 @@ public class SokoBot {
             closedList.add(node);//add node to closed list
 
             for (char move : moves) {//iterate through each movers
-                if (node.isMoveValid(move) && !node.isInSimpleDeadlock() && !node.isFreezeDeadloack()) {//check if move is valid, if not, skip   
+                if (node.isMoveValid(move) && !node.isInSimpleDeadlock()) {//check if move is valid, if not, skip   
                     Node child = new Node(node, move);//create child
                     
                     if (!closedList.contains(child) || (openList.contains(child) && compareInGraph(openList, child) > child.priorityCosts())) {
