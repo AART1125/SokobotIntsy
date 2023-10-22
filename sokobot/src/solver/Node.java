@@ -194,6 +194,15 @@ public class Node{
             int minDist = Integer.MAX_VALUE;
             for (Coordinates target : target) {
                 int dist = manhattanDistance(box, target);
+
+                if (map[box.getX()][box.getY()] == ' ') {
+                    //Give higher weight to empty spaces
+                    dist *= 2;
+                } else if (map[box.getX()][box.getY()] == '.') {
+                    //Give higher weight to boxes on target goals
+                    dist /= 2;
+                }
+
                 minDist = Math.min(minDist, dist);
             }
             cost += minDist;
