@@ -1,5 +1,7 @@
 package solver;
 
+import java.util.Random;
+
 /**
  * This class represents the coordinates of different items in the game
  */

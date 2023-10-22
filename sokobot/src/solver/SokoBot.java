@@ -18,7 +18,6 @@ public class SokoBot {
         Node node = new Node(height, width, mapData, itemsData);
         PriorityQueue<Node> openList = new PriorityQueue<Node>(11, new CostCompare());
         HashSet<Node> closedList = new HashSet<Node>();
-        int gen = 0;
 
         openList.add(node);//start the graph (openlist)
 
@@ -26,33 +25,14 @@ public class SokoBot {
             node = openList.poll();// place head to the current node
 
             if (node.goalFound()) {
-                System.out.println(gen);
                 return node.getPath();//if found, return path
             }
 
             closedList.add(node);//add node to closed list
 
             for (char move : moves) {//iterate through each movers
-                //System.out.println(node.isInSimpleDeadlock());
-                if (node.isMoveValid(move) && !node.isInSimpleDeadlock()) {//check if move is valid, if not, skip   
+                if (node.isMoveValid(move) && !node.isInSimpleDeadlock() && !node.isFreezeDeadloack()) {//check if move is valid, if not, skip   
                     Node child = new Node(node, move);//create child
-                    gen++;
-                    //System.out.println(gen);
-                    //System.out.println(move + " " + gen + " " + node.getHeuristicCost());
-                    /*for (int i = 0; i < height; i++) {
-                        System.out.print(child.getItems()[i][0]);
-                        for (int j = 0; j < width; j++) {
-                            System.out.print(child.getItems()[i][j]);
-                        }
-                        System.out.println("");
-                    }*/
-
-                    // if (!openList.contains(child) && ! closedList.contains(child)) {//add child to open list
-                    //     openList.add(child);                    
-                    // } else if (openList.contains(child) && compareInGraph(openList, child) > child.priorityCosts()){//check if child is present in list, if yes, remove and readd child for queuing
-                    //     openList.remove(child);
-                    //     openList.add(child);
-                    // }
                     
                     if (!closedList.contains(child) || (openList.contains(child) && compareInGraph(openList, child) > child.priorityCosts())) {
                         if (!openList.contains(child)) {

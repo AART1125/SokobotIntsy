@@ -75,7 +75,7 @@ public class Node{
     //reads the position of target items
     private Coordinates[] targetPosition(char[][] mapData){
         int targetcount = 0, poscount = 0;
-        int[] posX = new int[11], posY = new int[11];
+        int[] posX = new int[MAXBOXES], posY = new int[MAXBOXES];
 
         //checks map for targets
         for (int i = 0; i < height; i++) {
@@ -158,8 +158,9 @@ public class Node{
         return positions;
     }
 
+    //Checks if the current position of a box is in a deadlock position i.e a corner
     public boolean isInSimpleDeadlock(){
-        int count = 0;
+
         for (Coordinates box : boxes) {
             for (Coordinates square : obstacles) {
                 if (box.getX() == square.getX() && box.getY() == square.getY()) {
@@ -170,21 +171,6 @@ public class Node{
 
         return false;
     }
-
-    // private int calculateHeuristicCost(){
-    //     int cost = 0, minDist;
-
-    //     for (Coordinates boxes : boxes) {
-    //         minDist = Integer.MAX_VALUE;
-    //         for (Coordinates target : target) {
-    //             int dist = Math.abs(boxes.getX() - target.getX()) + Math.abs(boxes.getY() - target.getY());
-    //             minDist = Math.min(minDist,dist);
-    //         }
-    //         cost += minDist;
-    //     }
-        
-    //     return cost;
-    // }
 
     //Calculates the current heuristic cost of the state using the Manhattan Distance
     private int calculateHeuristicCost() {
@@ -364,52 +350,18 @@ public class Node{
     public boolean isFreezeDeadloack() {
         int blocked = 0;
         for (Coordinates box : boxes) {
-            if ((map[box.getX() - 1][box.getY()] == '#' && items[box.getX() - 1][box.getY()] == '$') || // !upBlocked
-                (map[box.getX() + 1][box.getY()] == '#' && items[box.getX() + 1][box.getY()] == '$') || // !downBlocked
-                (map[box.getX()][box.getY() - 1] == '#' && items[box.getX()][box.getY() - 1] == '$') || // !leftBlocked
-                (map[box.getX()][box.getY() + 1] == '#' && items[box.getX()][box.getY() + 1] == '$')) { // !rightBlocked
+            if ((map[box.getX() - 1][box.getY()] != '#' || items[box.getX() - 1][box.getY()] != '$') && // !upBlocked
+                (map[box.getX() + 1][box.getY()] != '#' || items[box.getX() + 1][box.getY()] != '$') && // !downBlocked
+                (map[box.getX()][box.getY() - 1] != '#' || items[box.getX()][box.getY() - 1] != '$') && // !leftBlocked
+                (map[box.getX()][box.getY() + 1] != '#' || items[box.getX()][box.getY() + 1] != '$')) { // !rightBlocked
                 continue;
             } else {
                 blocked++;
-                if(blocked == items.length || blocked == items[0].length)
+                if(blocked == boxes.length)
                     return true;
             }
         }
         return false;
-        /*switch (move) {
-            case 'u':
-                for (Coordinates box : boxes) {
-                    if (map[box.getX() - 1][box.getY()] == '#' || items[box.getX() - 1][box.getY()] == '$') {
-                        return true;
-                    }
-                }
-                return false;
-            
-            case 'd':
-                for (Coordinates box : boxes) {
-                    if (map[box.getX() + 1][box.getY()] == '#' || items[box.getX() + 1][box.getY()] == '$') {
-                        return true;
-                    }
-                }
-                return false;
-            
-            case 'l':
-                for (Coordinates box : boxes) {
-                    if (map[box.getX()][box.getY() - 1] == '#' || items[box.getX()][box.getY() - 1] == '$') {
-                        return true;
-                    }
-                }
-                return false;
-
-            case 'r':
-                for (Coordinates box : boxes) {
-                    if (map[box.getX()][box.getY() + 1] == '#' || items[box.getX()][box.getY() + 1] == '$') {
-                        return true;
-                    }
-                }
-                return false;
-        }
-        return true;*/
     }
 
 
