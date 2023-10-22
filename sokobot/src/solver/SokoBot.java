@@ -26,13 +26,15 @@ public class SokoBot {
             node = openList.poll();// place head to the current node
 
             if (node.goalFound()) {
+                System.out.println(gen);
                 return node.getPath();//if found, return path
             }
 
             closedList.add(node);//add node to closed list
 
             for (char move : moves) {//iterate through each movers
-                if (node.isMoveValid(move) ) {//check if move is valid, if not, skip
+                //System.out.println(node.isInSimpleDeadlock());
+                if (node.isMoveValid(move) && !node.isInSimpleDeadlock()) {//check if move is valid, if not, skip   
                     Node child = new Node(node, move);//create child
                     gen++;
                     //System.out.println(gen);

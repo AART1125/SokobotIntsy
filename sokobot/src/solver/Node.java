@@ -1,8 +1,8 @@
 package solver;
 
 import java.lang.Math;
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
 
 /**
  * Represents the current/possible states of the game. Goal of the game is to put all boxes in its 
@@ -15,7 +15,7 @@ public class Node{
 
     private Coordinates player;//Current position of the player in the map
     private Coordinates[] boxes, target;// Current positions of the boxes and targets in the map
-    private HashSet<Coordinates> obstacles;// gets the deadlocks in the map
+    private ArrayList<Coordinates> obstacles;// gets the deadlocks in the map
     private char[][] map, items;//Representation of map and the movable items within it
     private int actualCost, heuristicCost;//Costs of this state
     private int height, width;// height and width of the map
@@ -36,7 +36,7 @@ public class Node{
         this.boxes = boxPosition(itemsData);
         this.target = targetPosition(mapData);
         this.map = mapData;
-        //this.obstacles = simpleDeadlock();
+        this.obstacles = simpleDeadlock();
         this.items = itemsData;
         this.actualCost = 0;
         this.heuristicCost = calculateHeuristicCost();
@@ -53,7 +53,7 @@ public class Node{
     public Node(Node parentNode, char move) {
         this.height = parentNode.getHeight();
         this.width = parentNode.getWidth();
-        //this.obstacles = parentNode.getobstacles();
+        this.obstacles = parentNode.getobstacles();
         this.actualCost = parentNode.getActualCost() + 1;
         this.path = parentNode.getPath() + move;
         this.map = parentNode.getMap();
@@ -141,25 +141,35 @@ public class Node{
         return null;
     }
 
-    /*private HashSet<Coordinates> simpleDeadlock() throws ArrayIndexOutOfBoundsException{
-        HashSet<Coordinates> positions = new HashSet<Coordinates>();
+    private ArrayList<Coordinates> simpleDeadlock(){
+        ArrayList<Coordinates> positions = new ArrayList<Coordinates>();
 
-        for (Coordinates goal : target) {
-            for (int i = 1; i <= height; i++) {
-                for (int j = 1; j <= width; j++) {
-                    if (map[goal.getX()+i][goal.getY()+j] == ' ' || map[goal.getX()+i][goal.getY()+j] == '#') {
-                        positions.add(new Coordinates(goal.getX() + i, goal.getY() + j));
-                    } 
-                    
-                    if (map[goal.getX()-i][goal.getY()-j] == ' ' || map[goal.getX()+i][goal.getY()-j] == '#') {
-                        positions.add(new Coordinates(goal.getX() - i, goal.getY() - j));
-                    }
+        for (int i = 1; i < height - 1; i++) {
+            for (int j = 1; j < width - 1; j++) {
+                if (((map[i][j] == ' ') && (map[i-1][j] == '#' && map[i][j-1] == '#')) ||   //upper left corner so x = -1 and y = -1
+                    ((map[i][j] == ' ') && (map[i-1][j] == '#' && map[i][j+1] == '#')) ||   // upper right corner so x = -1 and y = +1
+                    ((map[i][j] == ' ') && (map[i+1][j] == '#' && map[i][j-1] == '#')) ||   // lower left corner so x = +1 and y = -1
+                    ((map[i][j] == ' ') && (map[i+1][j] == '#' && map[i][j+1] == '#'))) {   // lower right corner so x = +1 and y = +1
+                    positions.add(new Coordinates(i, j));
                 }
             }
         }
 
         return positions;
-    }*/
+    }
+
+    public boolean isInSimpleDeadlock(){
+        int count = 0;
+        for (Coordinates box : boxes) {
+            for (Coordinates square : obstacles) {
+                if (box.getX() == square.getX() && box.getY() == square.getY()) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 
     // private int calculateHeuristicCost(){
     //     int cost = 0, minDist;
@@ -226,7 +236,7 @@ public class Node{
                     newState[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] = '@';
 
                 }
-
+                
                 else if (newState[prev.getPlayer().getX() - 1][prev.getPlayer().getY()] == '$') {
                     this.actualCost++;
 
@@ -598,7 +608,7 @@ public class Node{
         return target;
     }
 
-    public HashSet<Coordinates> getobstacles() {
+    public ArrayList<Coordinates> getobstacles() {
         return obstacles;
     }
 
