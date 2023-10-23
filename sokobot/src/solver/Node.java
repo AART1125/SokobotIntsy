@@ -210,9 +210,6 @@ public class Node{
     }
 
     //Creates a new state based on the direction it decided to go to
-    /*
-     * fixed 
-     */
     private char[][] newItemState(Node prev, char move){
         char[][] newState = new char[height][width];//initialize the original state to change accordingly
 
@@ -329,26 +326,9 @@ public class Node{
     }
 
     /**
-     * Creates the string representation of the map for checking
-     * @return map string
-     */
-    public String stringRep(){
-        String str = "";
-        for (int i = 0; i < map.length; i++) {
-            for (int j = 0; j < map[0].length; j++) {
-                str += items[i][j];
-            }
-        }
-        return str;
-    }
-
-    /**
      * checks if move is valid
      * @param move direction of state
      * @return true or false
-     */
-    /*
-     * Constant time
      */
     public boolean isMoveValid(char move) {
         char pos, pos2, item, item2;
@@ -431,6 +411,20 @@ public class Node{
                 }
         }
         return false;
+    }
+
+    /**
+     * Creates the string representation of the map for checking
+     * @return map string
+     */
+    public String stringRep(){
+        String str = "";
+        for (int i = 0; i < map.length; i++) {
+            for (int j = 0; j < map[0].length; j++) {
+                str += items[i][j];
+            }
+        }
+        return str;
     }
 
     @Override
